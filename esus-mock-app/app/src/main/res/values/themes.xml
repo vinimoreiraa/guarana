@@ -1,0 +1,7 @@
+<resources>
+    <style name="Theme.EsusMock" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">#FFF5F5F5</item>
+        <item name="android:statusBarColor">#FF2E7D32</item>
+        <item name="android:navigationBarColor">#FF000000</item>
+    </style>
+</resources>
