@@ -139,7 +139,14 @@ fun CaptureScreen(
     var child by remember { mutableStateOf(patient?.isChild ?: false) }
     var busy by remember { mutableStateOf(false) }
     var routineStatus by remember { mutableStateOf<String?>(null) }
-    val lightEnabled = remember { settings.lightEnabled }
+    // anel ligado nos Ajustes, ou um ESP plugado na USB agora (checado a cada 2 s: plugar no meio da captura vale)
+    var lightEnabled by remember { mutableStateOf(settings.lightEnabled || (settings.lightTransport == "usb" && LightRigs.usbAttached(ctx))) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            delay(2000)
+            lightEnabled = settings.lightEnabled || (settings.lightTransport == "usb" && LightRigs.usbAttached(ctx))
+        }
+    }
     val tabletFlash = remember { settings.tabletFlash }
     val usesRoutine = lightEnabled || tabletFlash
     var lightLevel by remember { mutableFloatStateOf(settings.lightLevel) }

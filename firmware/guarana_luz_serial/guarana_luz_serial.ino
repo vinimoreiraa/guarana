@@ -1,4 +1,4 @@
-// Guarana-Luz Serial 2.0: interpretador de comandos pela USB para ESP32 / ESP32-CAM.
+// Guarana-Luz Serial 2.1: interpretador de comandos pela USB para ESP32 / ESP32-CAM.
 //
 // Nada de rotina, cor ou pino fixo aqui: o app manda tudo. A unica coisa presa ao hardware e o mapa de pinos
 // da camera da placa (AI-Thinker ESP32-CAM), que so entra se HAS_CAMERA for 1.
@@ -7,6 +7,7 @@
 //   P                                   ping: devolve firmware e configuracao atual
 //   CFG mode=ws pin=13 n=12 type=GRB flash=4      configura e grava na flash (sobrevive ao reboot)
 //   CFG mode=pwm r=12 g=13 b=14 w=15 flash=4      LEDs comuns por PWM em vez de fita enderecavel
+//   CFG mode=pwm r=27,33,16 g=-1 b=5,32,2 w=26,14,4 flash=-1   varios LEDs por cor: lista de pinos separada por virgula (ate 4)
 //   CFG ir=14                                     pino do LED infravermelho (-1 desliga)
 //   S RRGGBBWWII  (ou SRRGGBBWWII)      cor de todos os LEDs + brilho geral (hex)
 //   L i RRGGBB                          cor de um LED (sem mostrar)      X   mostra o que foi montado com L
@@ -14,6 +15,7 @@
 //   FL ii                               LED de flash da placa (branco forte, GPIO 4 na ESP32-CAM), 0..FF
 //   IR ii                               LED infravermelho (PWM no pino ir= do CFG), 0..FF; a camera do tablet precisa enxergar IR
 //   O                                   apaga tudo
+//   T                                   teste: acende vermelho, verde, azul e branco, meio segundo cada
 //   CAM res=VGA q=12                    resolucao (QVGA, VGA, SVGA, XGA) e qualidade JPEG (menor = melhor)
 //   F                                   captura um quadro: responde "FRAME <bytes>\n" seguido do JPEG cru
 //
@@ -52,16 +54,18 @@
 bool camReady = false;
 #endif
 
-const char* FW = "guarana-luz-serial 2.0";
+struct Grupo { int pin[4]; int ch[4]; int n; };   // antes de tudo: o Arduino gera prototipos que usam o tipo
+
+const char* FW = "guarana-luz-serial 2.1";
 Preferences prefs;
 
 // ---- configuracao (lida da flash, alterada por CFG) ----
 struct Cfg {
-  String mode = "ws";     // "ws" (fita enderecavel) ou "pwm"
+  String mode = "pwm";    // "ws" (fita enderecavel) ou "pwm"
   int pin = 13, n = 12;   // fita
   String type = "GRB";
-  int r = 12, g = 13, b = 14, w = 15;   // pwm
-  int flash = 4;          // LED de flash da placa (-1 desliga)
+  String r = "27,33,16", g = "-1", b = "5,32,2", w = "26,14,4";   // pwm: pinos de cada cor (lista)
+  int flash = -1;         // LED de flash da placa (4 na ESP32-CAM; -1 desliga)
   int ir = -1;            // LED infravermelho por PWM (-1 desliga)
   String res = "VGA";
   int q = 12;
@@ -73,8 +77,8 @@ uint8_t curBri = 255;
 void loadCfg() {
   prefs.begin("luz", true);
   cfg.mode = prefs.getString("mode", cfg.mode); cfg.pin = prefs.getInt("pin", cfg.pin); cfg.n = prefs.getInt("n", cfg.n);
-  cfg.type = prefs.getString("type", cfg.type); cfg.r = prefs.getInt("r", cfg.r); cfg.g = prefs.getInt("g", cfg.g);
-  cfg.b = prefs.getInt("b", cfg.b); cfg.w = prefs.getInt("w", cfg.w); cfg.flash = prefs.getInt("flash", cfg.flash);
+  cfg.type = prefs.getString("type", cfg.type); cfg.r = prefs.getString("rs", cfg.r); cfg.g = prefs.getString("gs", cfg.g);
+  cfg.b = prefs.getString("bs", cfg.b); cfg.w = prefs.getString("ws", cfg.w); cfg.flash = prefs.getInt("flash", cfg.flash);
   cfg.ir = prefs.getInt("ir", cfg.ir);
   cfg.res = prefs.getString("res", cfg.res); cfg.q = prefs.getInt("q", cfg.q);
   prefs.end();
@@ -82,7 +86,7 @@ void loadCfg() {
 void saveCfg() {
   prefs.begin("luz", false);
   prefs.putString("mode", cfg.mode); prefs.putInt("pin", cfg.pin); prefs.putInt("n", cfg.n); prefs.putString("type", cfg.type);
-  prefs.putInt("r", cfg.r); prefs.putInt("g", cfg.g); prefs.putInt("b", cfg.b); prefs.putInt("w", cfg.w); prefs.putInt("flash", cfg.flash);
+  prefs.putString("rs", cfg.r); prefs.putString("gs", cfg.g); prefs.putString("bs", cfg.b); prefs.putString("ws", cfg.w); prefs.putInt("flash", cfg.flash);
   prefs.putInt("ir", cfg.ir);
   prefs.putString("res", cfg.res); prefs.putInt("q", cfg.q);
   prefs.end();
@@ -92,7 +96,7 @@ void saveCfg() {
 void pwmSetup(int pin, int ch) {
   if (pin < 0) return;
 #if ESP_ARDUINO_VERSION_MAJOR >= 3
-  ledcAttach(pin, 5000, 8);
+  ledcDetach(pin); ledcAttach(pin, 5000, 8);
 #else
   ledcSetup(ch, 5000, 8); ledcAttachPin(pin, ch);
 #endif
@@ -105,6 +109,23 @@ void pwmWrite(int pin, int ch, uint8_t v) {
   ledcWrite(ch, v);
 #endif
 }
+
+// ---- grupos de LEDs por cor: ate 4 pinos cada, canal LEDC proprio por pino ----
+Grupo gR, gG, gB, gW;
+int proxCanal = 7;   // 4 = flash, 6 = IR; core 2.x usa canais 7..15 para os grupos
+
+void montaGrupo(Grupo& g, const String& lista) {
+  g.n = 0;
+  int a = 0;
+  while (a <= (int) lista.length() && g.n < 4) {
+    int e = lista.indexOf(',', a); if (e < 0) e = lista.length();
+    int pin = lista.substring(a, e).toInt();
+    if (lista.substring(a, e).length() && pin >= 0) { g.pin[g.n] = pin; g.ch[g.n] = proxCanal++; pwmSetup(pin, g.ch[g.n]); g.n++; }
+    a = e + 1;
+  }
+}
+void escreveGrupo(const Grupo& g, uint8_t v) { for (int i = 0; i < g.n; i++) pwmWrite(g.pin[i], g.ch[i], v); }
+String listaJson(const String& l) { return "[" + (l == "-1" ? String("") : l) + "]"; }
 
 neoPixelType typeFlags() {
   String t = cfg.type; t.toUpperCase();
@@ -119,7 +140,8 @@ void applyHardware() {
     strip = new Adafruit_NeoPixel(cfg.n, cfg.pin, typeFlags());
     strip->begin(); strip->setBrightness(curBri); strip->clear(); strip->show();
   } else {
-    pwmSetup(cfg.r, 0); pwmSetup(cfg.g, 1); pwmSetup(cfg.b, 2); pwmSetup(cfg.w, 3);
+    proxCanal = 7;
+    montaGrupo(gR, cfg.r); montaGrupo(gG, cfg.g); montaGrupo(gB, cfg.b); montaGrupo(gW, cfg.w);
   }
   pwmSetup(cfg.flash, 4); pwmWrite(cfg.flash, 4, 0);
   pwmSetup(cfg.ir, 6); pwmWrite(cfg.ir, 6, 0);
@@ -137,13 +159,14 @@ void fillAll(uint8_t r, uint8_t g, uint8_t b, uint8_t w, uint8_t bri) {
     }
     strip->show();
   } else {
-    pwmWrite(cfg.r, 0, r * bri / 255); pwmWrite(cfg.g, 1, g * bri / 255); pwmWrite(cfg.b, 2, b * bri / 255); pwmWrite(cfg.w, 3, w * bri / 255);
+    escreveGrupo(gR, r * bri / 255); escreveGrupo(gG, g * bri / 255); escreveGrupo(gB, b * bri / 255); escreveGrupo(gW, w * bri / 255);
   }
 }
 
 void allOff() {
   if (strip) { strip->clear(); strip->show(); }
-  pwmWrite(cfg.r, 0, 0); pwmWrite(cfg.g, 1, 0); pwmWrite(cfg.b, 2, 0); pwmWrite(cfg.w, 3, 0); pwmWrite(cfg.flash, 4, 0); pwmWrite(cfg.ir, 6, 0);
+  if (cfg.mode != "ws") { escreveGrupo(gR, 0); escreveGrupo(gG, 0); escreveGrupo(gB, 0); escreveGrupo(gW, 0); }
+  pwmWrite(cfg.flash, 4, 0); pwmWrite(cfg.ir, 6, 0);
 }
 
 static uint8_t hex2(const String& s, int i) { return (uint8_t) strtol(s.substring(i, i + 2).c_str(), nullptr, 16); }
@@ -157,7 +180,8 @@ String kv(const String& line, const String& key, const String& def) {
 
 String status() {
   String s = "{\"ok\":true,\"fw\":\"" + String(FW) + "\",\"mode\":\"" + cfg.mode + "\",\"pin\":" + cfg.pin + ",\"n\":" + cfg.n +
-             ",\"type\":\"" + cfg.type + "\",\"flash\":" + cfg.flash + ",\"ir\":" + cfg.ir + ",\"cam\":";
+             ",\"type\":\"" + cfg.type + "\",\"r\":" + listaJson(cfg.r) + ",\"g\":" + listaJson(cfg.g) + ",\"b\":" + listaJson(cfg.b) +
+             ",\"w\":" + listaJson(cfg.w) + ",\"flash\":" + cfg.flash + ",\"ir\":" + cfg.ir + ",\"cam\":";
 #if HAS_CAMERA
   s += camReady ? "true" : "false";
 #else
@@ -210,6 +234,11 @@ String handle(String line) {
 
   if (cmd == "P") return status();
   if (cmd == "O") { allOff(); return "{\"ok\":true}"; }
+  if (cmd == "T") {
+    const uint8_t seq[4][4] = {{255, 0, 0, 0}, {0, 255, 0, 0}, {0, 0, 255, 0}, {0, 0, 0, 255}};
+    for (auto& c : seq) { fillAll(c[0], c[1], c[2], c[3], 255); delay(500); }
+    allOff(); return "{\"ok\":true}";
+  }
   if (cmd == "X") { if (strip) strip->show(); return "{\"ok\":true}"; }
   if (cmd == "B" && rest.length() >= 2) { curBri = hex2(rest, 0); if (strip) { strip->setBrightness(curBri); strip->show(); } return "{\"ok\":true}"; }
   if (cmd == "FL" && rest.length() >= 2) { pwmWrite(cfg.flash, 4, hex2(rest, 0)); return "{\"ok\":true}"; }
@@ -232,8 +261,8 @@ String handle(String line) {
   if (cmd == "CFG") {
     String l = " " + rest;
     cfg.mode = kv(l, "mode", cfg.mode); cfg.pin = kv(l, "pin", String(cfg.pin)).toInt(); cfg.n = kv(l, "n", String(cfg.n)).toInt();
-    cfg.type = kv(l, "type", cfg.type); cfg.r = kv(l, "r", String(cfg.r)).toInt(); cfg.g = kv(l, "g", String(cfg.g)).toInt();
-    cfg.b = kv(l, "b", String(cfg.b)).toInt(); cfg.w = kv(l, "w", String(cfg.w)).toInt(); cfg.flash = kv(l, "flash", String(cfg.flash)).toInt();
+    cfg.type = kv(l, "type", cfg.type); cfg.r = kv(l, "r", cfg.r); cfg.g = kv(l, "g", cfg.g);
+    cfg.b = kv(l, "b", cfg.b); cfg.w = kv(l, "w", cfg.w); cfg.flash = kv(l, "flash", String(cfg.flash)).toInt();
     cfg.ir = kv(l, "ir", String(cfg.ir)).toInt();
     saveCfg(); applyHardware();
     return status();

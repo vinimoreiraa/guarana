@@ -96,6 +96,15 @@ object TabletFlashRoutine {
 }
 
 object LightRigs {
+    /** Conversores USB-serial que o app reconhece (CH340, CP210x, FTDI, Espressif nativo); o mesmo filtro do manifesto. */
+    private val VENDORS = setOf(0x1A86, 0x10C4, 0x0403, 0x303A)
+
+    /** Ha um ESP plugado na USB? Com ele plugado, o obturador dispara a rotina de cores sem precisar ligar nada nos Ajustes. */
+    fun usbAttached(context: Context): Boolean {
+        val manager = context.getSystemService(Context.USB_SERVICE) as? android.hardware.usb.UsbManager ?: return false
+        return manager.deviceList.values.any { it.vendorId in VENDORS }
+    }
+
     fun create(context: Context, settings: Settings): LightRig = when (settings.lightTransport) {
         "wifi" -> HttpLightRig(settings.lightHost)
         "ble" -> BleLightRig(context, settings.lightDeviceName)

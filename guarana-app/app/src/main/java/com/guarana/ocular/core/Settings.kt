@@ -34,9 +34,12 @@ class Settings(context: Context) {
     var usbBaud: Int
         get() = prefs.getInt("usb_baud", 115200)
         set(v) = prefs.edit().putInt("usb_baud", v).apply()
+    /** Anel v0: ESP32 DevKit com 9 LEDs comuns, 3 vermelhos (27, 33, 16), 3 brancos (26, 14, 4) e 3 azuis (5, 32, 2). */
+    private val CFG_PADRAO = "CFG mode=pwm r=27,33,16 g=-1 b=5,32,2 w=26,14,4 flash=-1 ir=-1"
+    private val CFG_ANTIGA = "CFG mode=ws pin=13 n=12 type=GRB flash=4"
     /** Linha CFG enviada ao conectar: pinos, quantidade e tipo de LED, flash. Nada disso fica fixo no firmware. */
     var lightConfigLine: String
-        get() = prefs.getString("light_cfg", "CFG mode=ws pin=13 n=12 type=GRB flash=4") ?: ""
+        get() = prefs.getString("light_cfg", null)?.takeIf { it != CFG_ANTIGA } ?: CFG_PADRAO
         set(v) = prefs.edit().putString("light_cfg", v.trim()).apply()
     /** Rotina de cores editavel (ver LightRoutines.parse). */
     var routineText: String
