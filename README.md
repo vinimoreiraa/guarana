@@ -28,7 +28,7 @@ Triagem, nunca diagnóstico. Os números de desempenho vêm de testes em fotos p
 | `treino/` | coleta de dados públicos, treino, testes externos e banco de arquiteturas |
 | `sintese/` | geração de olhos sintéticos no Blender |
 | `contrato/` | esquema JSON do resultado (app, motor local e nuvem) |
-| `docs/` | tese em PDF e [diário técnico](docs/historico.md) com todos os experimentos e números |
+| `docs/` | tese em PDF e [guia técnico](docs/GUIA_TECNICO.md) e [diário técnico](docs/historico.md) |
 
 ## Rodar
 
