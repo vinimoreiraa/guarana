@@ -51,7 +51,7 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 class MainActivity : ComponentActivity() {
-    companion object { const val EXTRA_FROM_ESUS = "from_esus"; const val EXTRA_CAPTURE = "capture" }
+    companion object { const val EXTRA_FROM_ESUS = "from_esus"; const val EXTRA_CAPTURE = "capture"; const val EXTRA_PESSOA = "pessoa" }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,7 +64,7 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); handleCompanion(intent) }
 
     /** Aberto pela pilula por cima do e-SUS: guarda de onde veio e pede a captura. */
-    private fun handleCompanion(i: Intent?) { i?.getStringExtra(EXTRA_FROM_ESUS)?.let { CompanionBridge.open(it, i.getBooleanExtra(EXTRA_CAPTURE, true)) } }
+    private fun handleCompanion(i: Intent?) { i?.getStringExtra(EXTRA_FROM_ESUS)?.let { CompanionBridge.open(it, i.getBooleanExtra(EXTRA_CAPTURE, true), i.getStringExtra(EXTRA_PESSOA)) } }
 }
 
 sealed interface Screen {
@@ -180,7 +180,17 @@ fun GuaranaApp(pipeline: Pipeline) {
     }
     BackHandler(enabled = screen != Screen.Home) { back() }
     // toque na pilula do e-SUS: vai direto para a captura
-    LaunchedEffect(CompanionBridge.requestId) { if (CompanionBridge.requestId > 0 && CompanionBridge.esusPackage != null) screen = if (CompanionBridge.capture) Screen.Capture else Screen.Home }
+    LaunchedEffect(CompanionBridge.requestId) {
+        if (CompanionBridge.requestId > 0 && CompanionBridge.esusPackage != null) {
+            // a pessoa aberta no e-SUS vira o paciente atual: acha pelo CNS (ou nome) no territorio, ou cria a ficha minima
+            CompanionBridge.pessoa?.split("|")?.takeIf { it.size == 4 && it[0].isNotBlank() }?.let { (nome, cns, sexo, idade) ->
+                val p = patients.firstOrNull { cns.isNotBlank() && it.cns == cns } ?: patients.firstOrNull { it.name.equals(nome, ignoreCase = true) }
+                    ?: pipeline.patients.create(nome, cns = cns, birthYear = idade.toIntOrNull()?.let { LocalDate.now().year - it }, sex = sexo)
+                patients = pipeline.patients.list(); selectPatient(p.id)
+            }
+            screen = if (CompanionBridge.capture) Screen.Capture else Screen.Home
+        }
+    }
 
     when (val s = screen) {
         Screen.Home -> HomeScreen(

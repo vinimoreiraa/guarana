@@ -71,6 +71,7 @@ fun ResultScreen(
     thresholds: Map<String, Float> = emptyMap(),
 ) {
     var notes by remember { mutableStateOf(a.notes) }
+    var porDoenca by remember { mutableStateOf(false) }
     // sinal cujo mapa de ativacao esta sobre a foto (toque num sinal para trocar)
     var explainId by remember { mutableStateOf(a.signs.firstOrNull { it.state == SignState.present && a.explain.containsKey(it.id) }?.id ?: a.signs.firstOrNull { a.explain.containsKey(it.id) }?.id) }
     var askPassword by remember { mutableStateOf(false) }
@@ -116,23 +117,6 @@ fun ResultScreen(
                 }
                 Spacer(Modifier.height(14.dp))
             }
-            if (a.frames.isNotEmpty()) {
-                item {
-                    SectionLabel("Rotina de luz · ${a.frames.size} quadros", Modifier.padding(top = 0.dp))
-                    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                        items(a.frames) { f ->
-                            val t: Bitmap? = remember(f.path) { Store.thumbnail(f.path, 260) }
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Box(Modifier.size(96.dp).clip(MaterialTheme.shapes.small).background(G.Sand)) {
-                                    if (t != null) Image(t.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
-                                }
-                                Text(f.label, style = MaterialTheme.typography.labelSmall, color = G.Ink3, modifier = Modifier.padding(top = 4.dp))
-                            }
-                        }
-                    }
-                    Spacer(Modifier.height(14.dp))
-                }
-            }
             item {
                 Text(
                     (patient?.let { "Paciente " + it.name.ifBlank { it.code } + " · " + it.code } ?: "Sem paciente") + (if (a.child) " · criança" else "") + (if (a.gaze.isNotBlank()) " · olhar ${a.gaze}" else ""),
@@ -150,6 +134,52 @@ fun ResultScreen(
                     Text("Pela ficha do cidadão", style = MaterialTheme.typography.titleSmall, color = G.AmberDark)
                     a.triageReasons.forEach { Text("• $it", style = MaterialTheme.typography.bodySmall, color = G.AmberDark) }
                     Text("Regra provisória, a validar com oftalmologista. Não altera o que a foto mostra.", style = MaterialTheme.typography.labelSmall, color = G.AmberDark)
+                }
+            }
+            if (!a.quality.ok) {
+                item {
+                    Spacer(Modifier.height(10.dp))
+                    WarningCard("Captura com problemas: " + a.quality.issues.joinToString(", "), "O resultado vale pouco. Repita com o olho bem aberto, mais luz e o aparelho firme.")
+                }
+            }
+            item {
+                Spacer(Modifier.height(12.dp))
+                PlainExplanation(a, thresholds, unreliable)
+            }
+            item {
+                // probabilidades por doenca: recolhidas, o resultado em prosa acima e o principal
+                Row(Modifier.fillMaxWidth().padding(top = 14.dp).clip(MaterialTheme.shapes.small).clickable { porDoenca = !porDoenca }.padding(vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically) {
+                    Text("Probabilidade por doença", style = MaterialTheme.typography.titleSmall, color = G.Ink2, modifier = Modifier.weight(1f))
+                    Icon(if (porDoenca) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore, if (porDoenca) "Recolher" else "Ver por doença", tint = G.Ink2)
+                }
+            }
+            if (porDoenca) {
+            val sorted = a.signs.sortedWith(compareByDescending<Sign> { it.state.ordinal == 0 }.thenByDescending { it.confidence })
+            itemsIndexed(sorted) { i, s ->
+                if (i > 0) Hairline()
+                Column(Modifier.fillMaxWidth().then(if (a.explain.containsKey(s.id)) Modifier.clickable { explainId = s.id } else Modifier)
+                    .then(if (explainId == s.id) Modifier.background(G.PinkSoft.copy(alpha = 0.5f)) else Modifier)) {
+                    SignRow(s, s.id in unreliable)
+                    ConfidenceBar(s.confidence, thresholds[s.id])
+                }
+            }
+            }
+            if (a.frames.isNotEmpty()) {
+                item {
+                    SectionLabel("Rotina de luz · ${a.frames.size} quadros", Modifier.padding(top = 0.dp))
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        items(a.frames) { f ->
+                            val t: Bitmap? = remember(f.path) { Store.thumbnail(f.path, 260) }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Box(Modifier.size(96.dp).clip(MaterialTheme.shapes.small).background(G.Sand)) {
+                                    if (t != null) Image(t.asImageBitmap(), null, Modifier.fillMaxSize(), contentScale = ContentScale.Crop)
+                                }
+                                Text(f.label, style = MaterialTheme.typography.labelSmall, color = G.Ink3, modifier = Modifier.padding(top = 4.dp))
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(14.dp))
                 }
             }
             if (a.indices.isNotEmpty()) {
@@ -183,26 +213,6 @@ fun ResultScreen(
                         )
                     }
                 }
-            }
-            if (!a.quality.ok) {
-                item {
-                    Spacer(Modifier.height(10.dp))
-                    WarningCard("Captura com problemas: " + a.quality.issues.joinToString(", "), "O resultado vale pouco. Repita com o olho bem aberto, mais luz e o aparelho firme.")
-                }
-            }
-            item { SectionLabel("Sinais avaliados") }
-            val sorted = a.signs.sortedWith(compareByDescending<Sign> { it.state.ordinal == 0 }.thenByDescending { it.confidence })
-            itemsIndexed(sorted) { i, s ->
-                if (i > 0) Hairline()
-                Column(Modifier.fillMaxWidth().then(if (a.explain.containsKey(s.id)) Modifier.clickable { explainId = s.id } else Modifier)
-                    .then(if (explainId == s.id) Modifier.background(G.PinkSoft.copy(alpha = 0.5f)) else Modifier)) {
-                    SignRow(s, s.id in unreliable)
-                    ConfidenceBar(s.confidence, thresholds[s.id])
-                }
-            }
-            item {
-                SectionLabel("Por que o aplicativo disse isso")
-                PlainExplanation(a, thresholds, unreliable)
             }
             item {
                 SectionLabel("A foto estava boa?")
@@ -352,11 +362,11 @@ private fun PlainExplanation(a: Analysis, thresholds: Map<String, Float>, unreli
                     style = MaterialTheme.typography.bodySmall, color = G.Ink2, modifier = Modifier.padding(top = 4.dp))
             } else {
                 val where = a.explainWhere.ifBlank { null } ?: wherePlain(a.explain[top.id], a.explainW, a.explainH, a.explainBoxes[top.id])
-                Text("Precisa de avaliação.", style = MaterialTheme.typography.titleSmall)
+                Text("Precisa de avaliação.", style = MaterialTheme.typography.titleMedium)
                 Text("Sinais compatíveis com ${Signs.name(top.id).lowercase()} (${Signs.LEIGO[top.id] ?: Signs.regionPlain(top.id)}), ${"%.0f".format(top.confidence * 100)}% de probabilidade." +
                     (where?.let { " O aplicativo concentrou a atenção $it." } ?: "") +
                     (Signs.TIPICO[top.id]?.let { " O sinal típico é $it." } ?: ""),
-                    style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
+                    style = MaterialTheme.typography.bodyLarge, modifier = Modifier.padding(top = 6.dp))
                 if (candidate.isNotEmpty()) Text("Outras possibilidades: " + candidate.joinToString(", ") { "${Signs.name(it.id).lowercase()} (${"%.0f".format(it.confidence * 100)}%)" } + ".",
                     style = MaterialTheme.typography.bodySmall, color = G.Ink2, modifier = Modifier.padding(top = 6.dp))
             }

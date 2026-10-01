@@ -31,7 +31,11 @@ object CompanionBridge {
     var capture: Boolean = true
         private set
 
-    fun open(pkg: String?, capture: Boolean = true) { esusPackage = pkg; this.capture = capture; requestId++ }
+    /** Pessoa aberta no e-SUS quando a pilula foi tocada: "nome|cns|sexo|idade". */
+    var pessoa: String? = null
+        private set
+
+    fun open(pkg: String?, capture: Boolean = true, pessoa: String? = null) { esusPackage = pkg; this.capture = capture; this.pessoa = pessoa; requestId++ }
 
     /** Sessao vinda do e-SUS terminou (voltou para la): o proximo uso do Guarana pelo launcher se comporta normalmente. */
     fun clear() { esusPackage = null }

@@ -47,7 +47,7 @@ object ReflectanceIndices {
         frames.firstOrNull { (label, _) -> keys.any { label.lowercase().contains(it) } }?.second
 
     fun compute(frames: List<Pair<String, File>>, segmenter: EyeSegmenter? = null): Pair<Reflectance, Bitmap?>? {
-        val whiteF = pick(frames, "branco", "white") ?: return null
+        val whiteF = pick(frames, "normal", "branco", "white") ?: return null
         val white = Store.decodeOriented(whiteF, SIDE) ?: return null
         val w = white.width; val h = white.height
         val blue = pick(frames, "azul", "blue")?.let { Store.decodeOriented(it, SIDE) }?.takeIf { it.width == w && it.height == h }

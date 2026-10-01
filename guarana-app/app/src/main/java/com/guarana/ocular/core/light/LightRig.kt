@@ -45,6 +45,13 @@ object LightRoutines {
     /** Formato editavel nos Ajustes: `rotulo; comando; espera_ms; foto; pausa-texto`. Linha com `*` no inicio e o quadro analisado.
      *  Comandos locais: `TORCH on` / `TORCH off` (flash do tablet) e `NOP` (nao muda a luz). */
     val PADRAO_TEXTO = """
+        *Normal; S000000FF99; 600; foto
+        Azul; S0000FF00FF; 500; foto
+        Vermelho; SFF000000FF; 500; foto
+    """.trimIndent()
+    /** Padroes anteriores: quem nunca editou a rotina passa para o padrao atual. */
+    val PADROES_ANTIGOS: Set<String> get() = setOf(PADRAO_ANTIGO, PADRAO_4_PASSOS)
+    private val PADRAO_4_PASSOS = """
         *Branco; SFFFFFFFF99; 600; foto
         Azul; S0000FF00FF; 500; foto
         Vermelho; SFF000000FF; 500; foto

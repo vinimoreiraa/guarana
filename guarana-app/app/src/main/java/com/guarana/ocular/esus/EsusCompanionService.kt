@@ -84,6 +84,7 @@ class EsusCompanionService : AccessibilityService() {
 
     private fun refresh(eventPkg: String?) {
         val active = activeAppPackage()
+        if (CompanionBridge.pendingFill != null) Log.i("Guarana", "esus: refresh ativo=$active evento=$eventPkg")
         if (active != null) { if (active in ESUS_PACKAGES) { lastEsus = active; show(); maybeFill() } else hide(); return }
         // sem janela de app ativa (teclado aberto, transicao, nossa propria pilula): so o e-SUS aparecendo muda o estado
         val ime = runCatching { windows }.getOrNull().orEmpty().any { it.type == AccessibilityWindowInfo.TYPE_INPUT_METHOD }
@@ -101,13 +102,22 @@ class EsusCompanionService : AccessibilityService() {
     private fun maybeFill() {
         val f = CompanionBridge.pendingFill ?: return
         if (fillJob?.isActive == true) return
-        fillJob = scope.launch { runFill(f) }
+        fillJob = scope.launch {
+            try { runFill(f) } catch (e: Throwable) { Log.e("Guarana", "esus: preenchimento falhou", e); CompanionBridge.pendingFill = null }
+        }
     }
 
     private fun toast(t: String) = Toast.makeText(this, t, Toast.LENGTH_LONG).show()
-    private fun root(): AccessibilityNodeInfo? = runCatching { rootInActiveWindow }.getOrNull()?.takeIf { it.packageName?.toString() in ESUS_PACKAGES }
+    /** Raiz da janela do e-SUS: a janela ativa quando e dele; senao procura entre as janelas de app (a pilula e o sistema podem estar ativos). */
+    private fun root(): AccessibilityNodeInfo? {
+        runCatching { rootInActiveWindow }.getOrNull()?.takeIf { it.packageName?.toString() in ESUS_PACKAGES }?.let { return it }
+        return runCatching { windows }.getOrNull().orEmpty()
+            .filter { it.type == AccessibilityWindowInfo.TYPE_APPLICATION }
+            .firstNotNullOfOrNull { w -> w.root?.takeIf { it.packageName?.toString() in ESUS_PACKAGES } }
+    }
 
     private suspend fun runFill(f: EsusFill) {
+        Log.i("Guarana", "esus: preenchendo ${f.patientName} itens=${f.itens} desfecho=${f.desfecho}")
         toast("Guaraná: preenchendo a visita no e-SUS…")
         // 1. chegar ao formulario da visita: se estiver na ficha do domicilio, toca VISITAR da pessoa
         var opened = false
@@ -121,25 +131,42 @@ class EsusCompanionService : AccessibilityService() {
             delay(500); tries++
         }
         val onForm = root()?.let { isVisitForm(it) } == true
+        Log.i("Guarana", "esus: formulario=$onForm tentativas=$tries")
         if (!onForm) {
             CompanionBridge.pendingFill = null
             toast("Guaraná: abra a visita de ${f.patientName.ifBlank { "da pessoa" }} no e-SUS e toque de novo em Registrar.")
             return
         }
         // 2. volta ao topo do formulario e marca os itens
+        Log.i("Guarana", "esus: no formulario, subindo")
         scrollToTop()
+        Log.i("Guarana", "esus: no topo")
         val marcados = mutableListOf<String>(); val faltou = mutableListOf<String>()
         for (item in f.itens) { if (ensureChecked(item)) marcados += item else faltou += item }
         // 3. desfecho
         ensureSelected(f.desfecho)
+        delay(600); scrollToTop()   // volta ao topo: o agente ve o motivo marcado antes de FINALIZAR
         CompanionBridge.pendingFill = null
+        Log.i("Guarana", "esus: marcados=$marcados faltou=$faltou")
         toast("Guaraná: marcado ${marcados.joinToString(", ")}" + (if (faltou.isNotEmpty()) " (não achei: ${faltou.joinToString(", ")})" else "") + ". Confira e toque em FINALIZAR.")
     }
 
-    private fun isVisitForm(r: AccessibilityNodeInfo) = r.findAccessibilityNodeInfosByText("Busca ativa").orEmpty().isNotEmpty()
+    /** Busca por texto percorrendo a arvore (findAccessibilityNodeInfosByText nao enxerga todas as telas, ex. Compose). */
+    private fun byText(r: AccessibilityNodeInfo, text: String): List<AccessibilityNodeInfo> {
+        val out = mutableListOf<AccessibilityNodeInfo>()
+        fun walk(n: AccessibilityNodeInfo?) {
+            if (n == null) return
+            val t = n.text?.toString().orEmpty(); val d = n.contentDescription?.toString().orEmpty()
+            if (t.contains(text, true) || d.contains(text, true)) out += n
+            for (i in 0 until n.childCount) walk(n.getChild(i))
+        }
+        walk(r); return out
+    }
+
+    private fun isVisitForm(r: AccessibilityNodeInfo) = byText(r, "Busca ativa").isNotEmpty()
 
     private fun exact(r: AccessibilityNodeInfo, text: String): List<AccessibilityNodeInfo> =
-        r.findAccessibilityNodeInfosByText(text).orEmpty().filter { n ->
+        byText(r, text).filter { n ->
             n.text?.toString()?.trim().equals(text, true) || n.contentDescription?.toString()?.trim().equals(text, true)
         }
 
@@ -173,7 +200,7 @@ class EsusCompanionService : AccessibilityService() {
         var r: AccessibilityNodeInfo? = r0
         repeat(8) {
             val rr = r ?: return false
-            val nameNode = exact(rr, name).firstOrNull() ?: rr.findAccessibilityNodeInfosByText(name).orEmpty().firstOrNull { it.text?.toString()?.contains(name, true) == true }
+            val nameNode = exact(rr, name).firstOrNull() ?: byText(rr, name).firstOrNull { it.text?.toString()?.contains(name, true) == true }
             if (nameNode != null) {
                 val y = centerY(nameNode)
                 val btn = exact(rr, "VISITAR").minByOrNull { kotlin.math.abs(centerY(it) - y) } ?: return false
@@ -286,13 +313,39 @@ class EsusCompanionService : AccessibilityService() {
         runCatching { wm.addView(capsule, lp); pill = capsule }.onFailure { Log.w("Guarana", "pílula do e-SUS: $it") }
     }
 
+    private val CNS_RE = Regex("""CNS (\d{15})""")
+
     private fun hide() { pill?.let { runCatching { wm.removeView(it) } }; pill = null }
 
     private fun openGuarana(capture: Boolean) {
+        val pessoa = pessoaNaTela()
         startActivity(Intent(this, MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP)
             putExtra(MainActivity.EXTRA_FROM_ESUS, lastEsus)
             putExtra(MainActivity.EXTRA_CAPTURE, capture)
+            pessoa?.let { putExtra(MainActivity.EXTRA_PESSOA, it) }
         })
+    }
+
+    /**
+     * Quem esta aberto no e-SUS agora: a linha "Masculino | 76 anos e 11 meses | CNS 947..." e o nome logo acima dela
+     * (cabecalho da visita e da ficha do cidadao). Devolve "nome|cns|sexo|idade" ou null fora dessas telas.
+     */
+    private fun pessoaNaTela(): String? {
+        val r = root() ?: return null
+        val textos = mutableListOf<String>()
+        fun walk(n: AccessibilityNodeInfo?) {
+            if (n == null) return
+            n.text?.toString()?.trim()?.takeIf { it.isNotEmpty() }?.let { textos += it }
+            for (i in 0 until n.childCount) walk(n.getChild(i))
+        }
+        walk(r)
+        val i = textos.indexOfFirst { CNS_RE.containsMatchIn(it) }
+        if (i <= 0) return null
+        val linha = textos[i]
+        val cns = CNS_RE.find(linha)!!.groupValues[1]
+        val sexo = when { linha.startsWith("Fem") -> "F"; linha.startsWith("Masc") -> "M"; else -> "" }
+        val idade = Regex("""(\d+) anos?""").find(linha)?.groupValues?.get(1) ?: ""
+        return "${textos[i - 1]}|$cns|$sexo|$idade"
     }
 }

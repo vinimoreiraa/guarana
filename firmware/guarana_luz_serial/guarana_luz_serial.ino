@@ -7,7 +7,7 @@
 //   P                                   ping: devolve firmware e configuracao atual
 //   CFG mode=ws pin=13 n=12 type=GRB flash=4      configura e grava na flash (sobrevive ao reboot)
 //   CFG mode=pwm r=12 g=13 b=14 w=15 flash=4      LEDs comuns por PWM em vez de fita enderecavel
-//   CFG mode=pwm r=27,33,16 g=-1 b=5,32,2 w=26,14,4 flash=-1   varios LEDs por cor: lista de pinos separada por virgula (ate 4)
+//   CFG mode=pwm r=27,33,17 g=-1 b=5,32,2 w=16,26,14 flash=-1   varios LEDs por cor: lista de pinos separada por virgula (ate 4)
 //   CFG ir=14                                     pino do LED infravermelho (-1 desliga)
 //   S RRGGBBWWII  (ou SRRGGBBWWII)      cor de todos os LEDs + brilho geral (hex)
 //   L i RRGGBB                          cor de um LED (sem mostrar)      X   mostra o que foi montado com L
@@ -15,6 +15,8 @@
 //   FL ii                               LED de flash da placa (branco forte, GPIO 4 na ESP32-CAM), 0..FF
 //   IR ii                               LED infravermelho (PWM no pino ir= do CFG), 0..FF; a camera do tablet precisa enxergar IR
 //   O                                   apaga tudo
+//   D                                   diagnostico: pinos de cada grupo e o duty PWM atual de cada um
+//   G pin v                             escreve 0/1 direto no pino, sem PWM (teste de ligacao)
 //   T                                   teste: acende vermelho, verde, azul e branco, meio segundo cada
 //   CAM res=VGA q=12                    resolucao (QVGA, VGA, SVGA, XGA) e qualidade JPEG (menor = melhor)
 //   F                                   captura um quadro: responde "FRAME <bytes>\n" seguido do JPEG cru
@@ -64,7 +66,7 @@ struct Cfg {
   String mode = "pwm";    // "ws" (fita enderecavel) ou "pwm"
   int pin = 13, n = 12;   // fita
   String type = "GRB";
-  String r = "27,33,16", g = "-1", b = "5,32,2", w = "26,14,4";   // pwm: pinos de cada cor (lista)
+  String r = "27,33,17", g = "-1", b = "5,32,2", w = "16,26,14";   // pwm: pinos de cada cor (lista)
   int flash = -1;         // LED de flash da placa (4 na ESP32-CAM; -1 desliga)
   int ir = -1;            // LED infravermelho por PWM (-1 desliga)
   String res = "VGA";
@@ -234,6 +236,33 @@ String handle(String line) {
 
   if (cmd == "P") return status();
   if (cmd == "O") { allOff(); return "{\"ok\":true}"; }
+  if (cmd == "D") {
+    String r = "{\"ok\":true";
+    const Grupo* gs[4] = {&gR, &gG, &gB, &gW}; const char* nm[4] = {"r", "g", "b", "w"};
+    for (int k = 0; k < 4; k++) {
+      r += ",\"" + String(nm[k]) + "\":[";
+      for (int i = 0; i < gs[k]->n; i++) {
+        if (i) r += ",";
+#if ESP_ARDUINO_VERSION_MAJOR >= 3
+        r += "[" + String(gs[k]->pin[i]) + "," + String(ledcRead(gs[k]->pin[i])) + "]";
+#else
+        r += "[" + String(gs[k]->pin[i]) + "," + String(ledcRead(gs[k]->ch[i])) + "]";
+#endif
+      }
+      r += "]";
+    }
+    return r + "}";
+  }
+  if (cmd == "G") {
+    int sp2 = rest.indexOf(' ');
+    if (sp2 < 0) return "{\"ok\":false,\"err\":\"G pin v\"}";
+    int pin = rest.substring(0, sp2).toInt(), v = rest.substring(sp2 + 1).toInt();
+#if ESP_ARDUINO_VERSION_MAJOR >= 3
+    ledcDetach(pin);
+#endif
+    pinMode(pin, OUTPUT); digitalWrite(pin, v ? HIGH : LOW);
+    return "{\"ok\":true,\"pin\":" + String(pin) + ",\"v\":" + String(digitalRead(pin)) + "}";
+  }
   if (cmd == "T") {
     const uint8_t seq[4][4] = {{255, 0, 0, 0}, {0, 255, 0, 0}, {0, 0, 255, 0}, {0, 0, 0, 255}};
     for (auto& c : seq) { fillAll(c[0], c[1], c[2], c[3], 255); delay(500); }

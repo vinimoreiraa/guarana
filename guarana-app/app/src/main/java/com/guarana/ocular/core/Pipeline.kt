@@ -58,23 +58,9 @@ class Pipeline(context: Context) {
         var result = store.save(bitmap, local.analyze(bitmap, quality, child).copy(patientId = patientId, framing = if (framing.available) framing.reason.name else "").withHistory(patient))
         result = store.saveFrames(result, frames)
         if (local.card.multiclasse) runCatching { anatomia(bitmap, result) }.getOrNull()?.let { w -> result = result.copy(explainWhere = w); store.update(result) }
-        // red-free por software: canal verde do quadro branco realca os vasos (como o filtro dos retinografos)
-        ReflectanceIndices.pick(frames, "branco", "white")?.let { wf ->
-            Store.decodeOriented(wf, 1200)?.let { wb ->
-                val rf = redFree(wb)
-                val f = File(store.capturesDir, "redfree_${result.createdAt}.jpg")
-                f.outputStream().use { rf.compress(Bitmap.CompressFormat.JPEG, 90, it) }
-                result = store.saveFrames(result, listOf("Red-free" to f))
-            }
-        }
         if (frames.isNotEmpty()) {                       // Ramo A: indices de reflectancia nos quadros da rotina
-            ReflectanceIndices.compute(frames, segmenter)?.let { (refl, overlay) ->
+            ReflectanceIndices.compute(frames, segmenter)?.let { (refl, _) ->
                 var withIdx = result.copy(indices = refl.toMap())
-                if (overlay != null) {
-                    val f = File(store.capturesDir, "roi_${result.createdAt}.jpg")
-                    f.outputStream().use { overlay.compress(Bitmap.CompressFormat.JPEG, 90, it) }
-                    withIdx = store.saveFrames(withIdx, listOf("ROI esclera" to f)).let { it.copy(frames = result.frames + it.frames.takeLast(1)) }
-                }
                 store.update(withIdx)
                 result = withIdx
             }

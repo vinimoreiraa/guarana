@@ -189,7 +189,7 @@ fun SettingsScreen(
                         Spacer(Modifier.height(8.dp))
                         OutlinedTextField(
                             value = cfgLine, onValueChange = { cfgLine = it; settings.lightConfigLine = it },
-                            label = { Text("Configuração enviada ao conectar") }, placeholder = { Text("CFG mode=pwm r=27,33,16 g=-1 b=5,32,2 w=26,14,4 flash=-1") },
+                            label = { Text("Configuração enviada ao conectar") }, placeholder = { Text("CFG mode=pwm r=27,33,17 g=-1 b=5,32,2 w=16,26,14 flash=-1") },
                             singleLine = true, modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.small,
                         )
                         Text(

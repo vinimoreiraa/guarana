@@ -78,6 +78,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.core.view.doOnLayout
@@ -163,7 +164,12 @@ fun CaptureScreen(
     var pauseText by remember { mutableStateOf<String?>(null) }
     val pauseGate = remember { arrayOfNulls<CompletableDeferred<Unit>>(1) }
 
-    suspend fun takePhoto(file: File): File = suspendCancellableCoroutine { cont ->
+    // modo demonstracao: com demo_olho.jpg na pasta do app, a imagem aparece no lugar da camera e vira a foto de cada passo
+    val demoFile = remember { File(ctx.getExternalFilesDir(null), "demo_olho.jpg").takeIf { it.exists() } }
+    val demoBitmap = remember { demoFile?.let { android.graphics.BitmapFactory.decodeFile(it.path)?.asImageBitmap() } }
+
+    var demoPasso = ""
+    suspend fun takePhoto(file: File): File = if (demoFile != null) { delay(150); demoTingida(demoFile, file, demoPasso) } else suspendCancellableCoroutine { cont ->
         imageCapture.takePicture(
             ImageCapture.OutputFileOptions.Builder(file).build(), ContextCompat.getMainExecutor(ctx),
             object : ImageCapture.OnImageSavedCallback {
@@ -224,6 +230,7 @@ fun CaptureScreen(
                     delay(step.settleMs)
                     if (i == 0) { lockExposure(cameraRef[0], true); delay(250) }   // mesma exposicao em todos os quadros
                     if (step.capture) {
+                        demoPasso = step.label
                         val f = takePhoto(File(capturesDir, "rot_${stamp}_$i.jpg"))
                         frames += step.label to f
                         if (step.label == principal) main = f
@@ -262,6 +269,7 @@ fun CaptureScreen(
                 },
                 modifier = Modifier.fillMaxSize(),
             )
+            demoBitmap?.let { androidx.compose.foundation.Image(it, null, Modifier.fillMaxSize().background(Color.Black), contentScale = androidx.compose.ui.layout.ContentScale.Fit) }
         } else {
             Column(Modifier.align(Alignment.Center).padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
                 Text("Precisamos da câmera para fotografar o olho.", color = Color.White, style = MaterialTheme.typography.bodyLarge)
@@ -269,7 +277,7 @@ fun CaptureScreen(
                 Button(onClick = { permission.launch(Manifest.permission.CAMERA) }) { Text("Permitir câmera") }
             }
         }
-        EyeGuideOverlay(Modifier.fillMaxSize(), when { framingHint == null -> G.Pink; framingHint!!.ok -> G.Leaf; framingHint!!.rejects -> G.Red; else -> G.Amber })
+        EyeGuideOverlay(Modifier.fillMaxSize(), when { demoFile != null -> G.Leaf; framingHint == null -> G.Pink; framingHint!!.ok -> G.Leaf; framingHint!!.rejects -> G.Red; else -> G.Amber })
 
         // barra superior: voltar, paciente, crianca, microfone
         Row(Modifier.fillMaxWidth().statusBarsPadding().padding(8.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -292,7 +300,7 @@ fun CaptureScreen(
                 Text(status, color = G.Seed, style = MaterialTheme.typography.labelMedium, modifier = Modifier.clip(CircleShape).background(G.Cream).padding(horizontal = 14.dp, vertical = 7.dp))
             }
         }
-        if (routineStatus == null && pauseText == null) framingHint?.let { fh ->
+        if (routineStatus == null && pauseText == null && demoFile == null) framingHint?.let { fh ->
             Box(Modifier.align(Alignment.TopCenter).statusBarsPadding().padding(top = 64.dp)) {
                 Text(
                     fh.reason.message, color = when { fh.ok -> G.LeafDark; fh.rejects -> G.RedDark; else -> G.AmberDark }, style = MaterialTheme.typography.labelMedium,
@@ -343,7 +351,7 @@ fun CaptureScreen(
                 }
             }
             Text(
-                if (lightEnabled) "Branco, azul, vermelho e sem luz" else if (tabletFlash) "Flash do tablet e sem luz" else "Enquadre o olho na moldura, sem flash",
+                if (lightEnabled) "Normal, azul e vermelho" else if (tabletFlash) "Flash do tablet e sem luz" else "Enquadre o olho na moldura, sem flash",
                 color = Color.White.copy(alpha = 0.85f), style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 6.dp, bottom = 10.dp),
             )
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(36.dp)) {
@@ -444,4 +452,22 @@ private fun EyeGuideOverlay(modifier: Modifier, ring: Color = G.Pink) {
         drawOval(Color.Transparent, topLeft = tl, size = Size(ow, oh), blendMode = BlendMode.Clear)
         drawOval(ring, topLeft = tl, size = Size(ow, oh), style = Stroke(width = 4f))
     }
+}
+
+/** Modo demonstracao: simula a luz do passo da rotina sobre a foto de demo (ganho por canal), para o ramo de cor ter o que medir. */
+private fun demoTingida(src: File, dst: File, passo: String): File {
+    val (r, g, b) = when {
+        passo.contains("azul", true) -> Triple(0.8f, 0.86f, 1.0f)
+        passo.contains("vermelh", true) -> Triple(1.0f, 0.86f, 0.82f)
+        passo.contains("ambiente", true) || passo.contains("sem luz", true) -> Triple(0.3f, 0.3f, 0.3f)
+        else -> Triple(1f, 1f, 1f)
+    }
+    if (r == 1f && g == 1f && b == 1f) return src.copyTo(dst, overwrite = true)
+    val bmp = android.graphics.BitmapFactory.decodeFile(src.path)
+    val out = android.graphics.Bitmap.createBitmap(bmp.width, bmp.height, android.graphics.Bitmap.Config.ARGB_8888)
+    android.graphics.Canvas(out).drawBitmap(bmp, 0f, 0f, android.graphics.Paint().apply {
+        colorFilter = android.graphics.ColorMatrixColorFilter(android.graphics.ColorMatrix().apply { setScale(r, g, b, 1f) })
+    })
+    dst.outputStream().use { out.compress(android.graphics.Bitmap.CompressFormat.JPEG, 92, it) }
+    return dst
 }
