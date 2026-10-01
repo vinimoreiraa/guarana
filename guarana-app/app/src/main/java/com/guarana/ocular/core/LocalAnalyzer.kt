@@ -33,6 +33,7 @@ class LocalAnalyzer(context: Context) {
     }
 
     fun analyze(bitmap: Bitmap, quality: Quality, child: Boolean): Analysis {
+        if (card.multiclasse) return analyzeMulticlasse(bitmap, quality, child)
         val s = card.inputSize
         val t0 = System.nanoTime()
         val vs = views(bitmap)
@@ -84,6 +85,55 @@ class LocalAnalyzer(context: Context) {
             needsCloudReview = true,
             child = child,
             explain = explain, explainW = ew, explainH = eh, explainBoxes = boxes, inferenceMs = ms,
+        )
+    }
+
+    /**
+     * v2.3+: decisao conservadora. P(doente) = 1 - P(normal); acima do corte do cartao a pessoa "precisa de avaliacao" e a doenca
+     * mais provavel (fora "normal") vira o sinal presente, que da o nivel da triagem e a explicacao. Abaixo do corte: sem sinais.
+     * O mapa de atencao do modelo (24x24) mostra onde ele olhou.
+     */
+    private fun analyzeMulticlasse(bitmap: Bitmap, quality: Quality, child: Boolean): Analysis {
+        val s = card.inputSize; val t0 = System.nanoTime()
+        var probs = FloatArray(card.labels.size); var att: Array<FloatArray>? = null
+        OnnxTensor.createTensor(env, FloatBuffer.wrap(preprocess(bitmap, s)), longArrayOf(1, 3, s.toLong(), s.toLong())).use { t ->
+            session.run(mapOf(session.inputNames.first() to t)).use { r ->
+                @Suppress("UNCHECKED_CAST")
+                probs = (r[0].value as Array<FloatArray>)[0]
+                runCatching { @Suppress("UNCHECKED_CAST") att = (r.get("atencao").get().value as Array<Array<FloatArray>>)[0] }
+            }
+        }
+        val ms = (System.nanoTime() - t0) / 1_000_000
+        val iNormal = card.labels.indexOf("normal")
+        val pDoente = if (iNormal >= 0) 1f - probs[iNormal] else probs.maxOrNull() ?: 0f
+        val precisa = pDoente >= card.corteDoente
+        val doencas = card.labels.indices.filter { it != iNormal }.sortedByDescending { probs[it] }
+        val top = doencas.firstOrNull()
+        val signs = doencas.map { i ->
+            val id = card.labels[i]; val p = probs[i]
+            val state = when {
+                !precisa -> SignState.absent
+                i == top -> SignState.present
+                p >= 0.15f -> SignState.candidate
+                else -> SignState.absent
+            }
+            Sign(id, state, p, Signs.REGIONS[id] ?: "esclera", "p=%.2f · P(doente)=%.2f · corte=%.2f".format(p, pDoente, card.corteDoente))
+        }
+        // recorte central usado no preprocess (lado menor), em fracao da foto, para desenhar o mapa no lugar certo
+        val side = min(bitmap.width, bitmap.height) / 1.1f
+        val box = floatArrayOf((bitmap.width - side) / 2f / bitmap.width, (bitmap.height - side) / 2f / bitmap.height, side / bitmap.width, side / bitmap.height)
+        val explain = HashMap<String, FloatArray>(); val boxes = HashMap<String, FloatArray>()
+        val a = att
+        if (a != null && top != null && precisa) {
+            val h = a.size; val w = a[0].size
+            explain[card.labels[top]] = FloatArray(h * w) { k -> a[k / w][k % w] }; boxes[card.labels[top]] = box
+        }
+        val gh = a?.size ?: 0; val gw = a?.getOrNull(0)?.size ?: 0
+        return Analysis(
+            engine = "local-model", status = "provisional", modelVersion = card.name,
+            quality = quality.copy(metrics = quality.metrics + mapOf("p_doente" to pDoente, "corte_doente" to card.corteDoente)),
+            signs = signs, triage = if (precisa) Triage.decide(signs, child) else "sem_sinais", needsCloudReview = true, child = child,
+            explain = explain, explainW = gw, explainH = gh, explainBoxes = boxes, inferenceMs = ms,
         )
     }
 

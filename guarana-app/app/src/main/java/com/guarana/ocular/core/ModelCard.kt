@@ -15,11 +15,25 @@ class ModelCard(
     /** limiar de "candidato" (mais frouxo) por sinal; se o cartao nao trouxer, o app usa metade do limiar de presente */
     val candidateThresholds: Map<String, Float> = emptyMap(),
     val unreliable: Set<String>,
+    /** "multirrotulo" (v2.x, sigmoide por sinal) ou "multiclasse" (v2.3+, softmax com classe normal e decisao conservadora) */
+    val task: String = "multirrotulo",
+    /** corte de P(doente) = 1 - P(normal) para "precisa de avaliacao" (so multiclasse) */
+    val corteDoente: Float = 0.5f,
 ) {
+    val multiclasse: Boolean get() = task == "multiclasse"
     companion object {
         fun load(context: Context): ModelCard {
             val o = JSONObject(context.assets.open("model_card.json").bufferedReader().use { it.readText() })
             val input = o.getJSONObject("input")
+            if (o.optString("task") == "multiclasse") {
+                val cl = o.getJSONArray("classes"); val m = input.getJSONArray("mean"); val sd = input.getJSONArray("std"); val thr0 = o.optJSONObject("thresholds")
+                return ModelCard(
+                    name = o.optString("name", "modelo"), file = o.getJSONObject("files").getString("recommended"), inputSize = input.getInt("size"),
+                    mean = FloatArray(3) { m.getDouble(it).toFloat() }, std = FloatArray(3) { sd.getDouble(it).toFloat() },
+                    labels = List(cl.length()) { cl.getString(it) }, thresholds = thr0?.keys()?.asSequence()?.associateWith { thr0.getDouble(it).toFloat() } ?: emptyMap(),
+                    unreliable = emptySet(), task = "multiclasse", corteDoente = o.optDouble("corte_doente", 0.5).toFloat(),
+                )
+            }
             val shape = input.getJSONArray("shape")
             val meanArr = input.getJSONArray("mean")
             val stdArr = input.getJSONArray("std")

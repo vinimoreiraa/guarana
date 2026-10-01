@@ -14,7 +14,7 @@ package com.guarana.ocular.core
  */
 object Triage {
     /** ceratite e uveite pedem avaliacao no mesmo dia (dor, risco de sequela); lente intraocular e so contexto */
-    private val URGENTE = setOf("ceratite", "uveite")
+    private val URGENTE = setOf("ceratite", "uveite", "trauma_ocular")
     private val ENCAMINHAR = setOf("lesao_pigmentada", "catarata_leucocoria", "ictericia", "opacidade_corneana", "pterigio_pinguecula",
         "pterigio", "tumor_superficie_ocular", "esclera_azul", "manchas_bitot", "ocronose", "telangiectasia", "palidez_conjuntival", "arco_corneano")
     private val OBSERVAR = setOf("hiperemia", "hemorragia_subconjuntival", "pinguecula", "conjuntivite", "cisto_conjuntival", "alteracao_palpebral")

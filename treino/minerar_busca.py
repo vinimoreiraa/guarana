@@ -12,21 +12,33 @@ from preparar_novas_fontes import dhash, ham, lista, LABELS, RAW
 from preparar_pubmed import framing
 OUT = RAW / "busca_web"; OUT.mkdir(parents=True, exist_ok=True)
 TERMOS = {
- "pterigio": ["pterygium", "pterygium eye", "pterygium red eye", "pterygium large", "pterygium eye photo", "pterygium vascular wing eye", "pterígio olho foto", "pterigión ojo foto", "carnosidad en el ojo", "surfer's eye pterygium", "pterygium nasal conjunctiva", "pterygium before surgery eye"],
- "pinguecula": ["pinguecula eye photo", "pinguécula olho", "pinguécula ojo"],
- "hemorragia_subconjuntival": ["subconjunctival hemorrhage eye", "hemorragia subconjuntival olho", "derrame ocular hemorragia subconjuntival", "hiposfagma"],
- "ictericia": ["jaundice eyes yellow sclera", "icterícia olhos amarelos", "ictericia ojos amarillos escleras", "scleral icterus photo"],
- "conjuntivite": ["conjunctivitis eye photo", "conjuntivite olho vermelho", "conjuntivitis ojo rojo", "pink eye adult photo"],
- "hiperemia": ["red eye bloodshot close up", "olho vermelho irritado foto", "ojo rojo irritado foto", "episcleritis eye photo", "escleritis ojo foto"],
- "catarata_leucocoria": ["mature cataract white pupil photo", "catarata madura pupila branca foto", "catarata madura pupila blanca foto", "leukocoria child eye photo", "leucocoria criança foto"],
- "ceratite": ["corneal ulcer eye photo", "úlcera de córnea foto", "úlcera corneal foto", "bacterial keratitis eye", "fungal keratitis eye photo", "ceratite olho foto"],
- "uveite": ["anterior uveitis eye photo ciliary flush", "uveíte anterior olho foto", "uveítis anterior ojo foto", "hypopyon eye photo", "iritis red eye photo"],
- "opacidade_corneana": ["corneal opacity eye photo", "corneal scar leukoma eye", "leucoma corneano foto", "leucoma corneal ojo"],
- "alteracao_palpebral": ["chalazion eyelid photo", "calázio pálpebra foto", "chalazión párpado foto", "hordeolum stye eyelid photo", "terçol foto", "orzuelo foto", "blepharitis eyelid photo", "blefarite foto", "ptosis eyelid photo adult"],
- "lesao_pigmentada": ["conjunctival nevus eye photo", "nevo conjuntival foto", "nevus conjuntival foto", "conjunctival melanoma photo"],
- "tumor_superficie_ocular": ["ocular surface squamous neoplasia photo", "conjunctival tumor eye photo", "conjunctival papilloma photo"],
- "normal": ["healthy eye close up photo", "olho saudável foto close", "ojo sano foto de cerca", "human eye macro photo brown", "eye close up dark skin", "olho de perto criança", "beautiful eye macro", "eye close up stock photo", "brown eye close up", "blue eye close up", "green eye macro photography", "elderly eye close up", "child eye close up", "asian eye close up", "african eye close up photo"],
+ "ictericia": ["jaundice eyes", "yellow eyes jaundice", "scleral icterus", "icterus eye close up", "yellow sclera liver", "jaundice newborn eyes", "hepatitis yellow eyes", "icterícia olhos", "olhos amarelos icterícia", "esclera amarelada", "ictericia ojos", "ojos amarillos hepatitis", "ictère yeux jaunes", "jaundice eyes adult photo", "yellowing of the whites of the eyes"],
+ "conjuntivite": ["conjunctivitis eye", "pink eye", "viral conjunctivitis", "bacterial conjunctivitis discharge", "allergic conjunctivitis eye", "adenovirus conjunctivitis", "conjuntivite", "conjuntivite viral olho", "conjuntivite bacteriana secreção", "conjuntivitis", "ojo rojo conjuntivitis", "conjonctivite oeil"],
+ "pterigio": ["pterygium", "pterygium eye", "pterygium red eye", "pterygium large", "pterygium cornea", "nasal pterygium", "pterygium surfer's eye", "pterígio", "pterígio olho", "carne no olho pterígio", "pterigión", "carnosidad ojo", "ptérygion oeil"],
+ "catarata_leucocoria": ["mature cataract eye", "white cataract pupil", "hypermature cataract", "cataract eye close up", "catarata olho", "catarata madura", "catarata ojo blanco", "cataracte oeil", "leukocoria", "white pupil child photo", "retinoblastoma white reflex", "congenital cataract baby eye", "leucocoria", "reflexo branco olho criança"],
+ "ceratite": ["corneal ulcer", "corneal ulcer eye photo", "bacterial keratitis", "fungal keratitis", "keratitis eye", "corneal infiltrate", "herpes keratitis", "úlcera de córnea", "ceratite", "úlcera corneal", "queratitis", "ulcère cornéen"],
+ "hemorragia_subconjuntival": ["subconjunctival hemorrhage", "subconjunctival haemorrhage", "broken blood vessel eye", "burst blood vessel in eye", "blood in white of eye", "hemorragia subconjuntival", "derrame no olho", "vaso estourado no olho", "hiposfagma", "derrame ocular", "hémorragie sous-conjonctivale"],
+ "alteracao_palpebral": ["chalazion", "chalazion eyelid", "stye eyelid", "hordeolum", "blepharitis eyelid", "eyelid swelling stye", "ptosis eyelid", "entropion", "ectropion", "trichiasis", "calázio", "terçol", "blefarite", "chalazión párpado", "orzuelo"],
+ "uveite": ["uveitis eye", "anterior uveitis", "iritis red eye", "hypopyon", "ciliary flush", "uveitis red eye photo", "uveíte", "hipópio", "uveítis anterior", "iritis ojo"],
+ "trauma_ocular": ["eye injury", "corneal foreign body", "foreign body eye", "chemical eye burn", "eye trauma bruise", "hyphema", "corneal abrasion eye", "black eye injury", "corpo estranho no olho", "queimadura química olho", "trauma ocular", "hifema", "cuerpo extraño ojo", "quemadura ocular química"],
+ "celulite_orbitaria": ["periorbital cellulitis", "orbital cellulitis", "preseptal cellulitis child", "swollen eyelid infection", "dacryocystitis", "celulite periorbitária", "celulite orbitária", "celulitis periorbitaria", "dacriocistite"],
+ "hanseniase_ocular": ["leprosy eye", "lagophthalmos", "lagophthalmos leprosy", "madarosis", "madarosis leprosy eyebrow", "facial palsy eye cannot close", "hanseníase olho", "lagoftalmo", "madarose", "lepra ojo"],
+ "palidez_conjuntival": ["conjunctival pallor", "pale conjunctiva anemia", "anemia eyelid pale", "lower eyelid pallor anemia", "palidez conjuntival", "anemia pálpebra pálida", "palidez conjuntival anemia"],
+ "tracoma": ["trachoma", "trachomatous trichiasis", "trachoma eyelid", "trachoma follicles", "tracoma", "triquíase tracomatosa"],
+ "normal": ["healthy eye close up photo", "eye close up stock photo", "brown eye close up", "blue eye close up", "green eye macro photography", "elderly eye close up", "child eye close up", "asian eye close up", "african eye close up photo", "olho humano de perto", "ojo humano de cerca", "beautiful eye macro", "eye makeup close up", "man eye close up", "teenager eye close up"],
 }
+TERMOS_EXTRA = {
+ "hemorragia_subconjuntival": ["subconjunctival hemorrhage close up", "red spot on white of eye", "eye blood spot after coughing", "subconjunctival bleeding elderly", "eye hemorrhage photo", "sangue no branco do olho", "mancha vermelha no olho", "hemorragia subconjuntival foto", "mancha de sangre en el ojo", "subconjunctival hemorrhage newborn"],
+ "trauma_ocular": ["corneal foreign body metal", "rust ring cornea", "eye injury emergency photo", "traumatic hyphema photo", "chemical burn eye limbal ischemia", "alkali burn eye", "eyelid laceration", "penetrating eye injury", "ferimento no olho", "lesão ocular trauma foto", "trauma ocular cuerpo extraño", "orbital fracture black eye"],
+ "ceratite": ["corneal ulcer close up", "infected cornea white spot", "contact lens corneal ulcer", "acanthamoeba keratitis", "fungal corneal ulcer farmer", "dendritic ulcer", "corneal abscess", "úlcera de córnea fungo", "ceratite bacteriana foto", "úlcera corneal bacteriana"],
+ "uveite": ["acute anterior uveitis eye", "hypopyon uveitis photo", "iritis eye photo", "ciliary injection eye", "posterior synechiae pupil", "uveíte olho vermelho foto", "irite olho", "uveítis ojo rojo", "toxoplasmosis uveitis eye", "HLA-B27 uveitis eye"],
+ "ictericia": ["yellow eyes hepatitis patient", "jaundiced sclera close up", "liver failure yellow eyes", "neonatal jaundice yellow sclera", "icterícia neonatal olhos", "olho amarelo hepatite", "ojos amarillos ictericia neonatal", "sclera yellow discoloration"],
+ "celulite_orbitaria": ["orbital cellulitis child eye", "periorbital cellulitis swollen eye", "preseptal cellulitis", "eyelid abscess", "swollen eye infection child", "celulite periorbital criança", "olho inchado infecção", "celulitis orbitaria niño", "dacryocystitis swelling", "orbital abscess proptosis"],
+ "hanseniase_ocular": ["leprosy lagophthalmos", "leprosy eye complications", "madarosis eyebrows leprosy", "lepromatous leprosy face eyes", "facial nerve palsy lagophthalmos", "exposure keratopathy lagophthalmos", "hanseníase olho lagoftalmo", "hanseníase madarose", "lepra lagoftalmos", "Bell's palsy eye cannot close"],
+ "hiperemia": ["bloodshot eyes close up", "red eyes irritation", "dry eye redness", "episcleritis", "scleritis red eye", "olho vermelho irritado", "olhos vermelhos cansaço", "ojos rojos irritados"],
+}
+TERMOS.update({k: v for k, v in TERMOS_EXTRA.items() if k not in TERMOS})
+
 SEG = json.load(open(BASE / "saida/fenda_card.json")); SS = SEG["input"]["size"]; SM, SD = np.array(SEG["input"]["mean"], np.float32), np.array(SEG["input"]["std"], np.float32)
 seg = ort.InferenceSession(str(BASE / "saida/fenda_v1.onnx"), providers=["CPUExecutionProvider"])
 def plausivel(im):
@@ -37,7 +49,9 @@ def plausivel(im):
     if iri.sum() < 60 or fen.sum() < 1.15 * iri.sum(): return None
     return c
 def main():
-    ap = argparse.ArgumentParser(); ap.add_argument("--por-termo", type=int, default=80); ap.add_argument("--sinais", default=""); a = ap.parse_args()
+    ap = argparse.ArgumentParser(); ap.add_argument("--por-termo", type=int, default=80); ap.add_argument("--sinais", default=""); ap.add_argument("--extra", action="store_true"); a = ap.parse_args()
+    if a.extra:
+        for k, v in TERMOS_EXTRA.items(): TERMOS[k] = v
     from ddgs import DDGS
     # indice de hashes do que ja temos
     md5s = set(); dh = []
@@ -51,16 +65,21 @@ def main():
         if a.sinais and sinal not in a.sinais.split(","): continue
         d = OUT / sinal; d.mkdir(exist_ok=True); n_ok = 0
         for termo in termos:
-            try:
-                with DDGS() as dd: res = list(dd.images(termo, max_results=a.por_termo))
-            except Exception as e: print("  busca falhou", termo, e, flush=True); time.sleep(5); continue
-            for r in res:
-                url = r.get("image") or ""
-                if not url.lower().split("?")[0].endswith((".jpg", ".jpeg", ".png", ".webp")) and "image" not in url.lower(): pass
+            res = []
+            for be in ("bing", "duckduckgo"):
+                try: res += DDGS().images(termo, max_results=a.por_termo, backend=be)
+                except Exception as e: print(f"  {be} falhou {termo}: {str(e)[:60]}", flush=True)
+            urls = list(dict.fromkeys(r.get("image") or "" for r in res if r.get("image")))
+            from concurrent.futures import ThreadPoolExecutor
+            def baixa(url):
                 try:
                     req = urllib.request.Request(url, headers=UA)
-                    with urllib.request.urlopen(req, timeout=15) as resp: b = resp.read(12_000_000)
-                    im = ImageOps.exif_transpose(Image.open(io.BytesIO(b))).convert("RGB")
+                    with urllib.request.urlopen(req, timeout=10) as resp: return url, resp.read(12_000_000)
+                except Exception: return url, None
+            with ThreadPoolExecutor(16) as ex: baixados = list(ex.map(baixa, urls))
+            for url, b in baixados:
+                if not b: continue
+                try: im = ImageOps.exif_transpose(Image.open(io.BytesIO(b))).convert("RGB")
                 except Exception: continue
                 if min(im.size) < 200: continue
                 m = hashlib.md5(b).hexdigest()
@@ -72,10 +91,12 @@ def main():
                 if c is None: continue
                 vistos_md5.add(m); vistos_dh.append(h); fn = d / f"{m[:12]}.jpg"; im.save(fn, "JPEG", quality=92); n_ok += 1
                 rows.append({"file": str(fn.relative_to(BASE / "dados")), "subject_id": f"web_{m[:12]}", "source": "busca_web", "domain": "web", **{l: int(l == sinal) for l in LABELS}, "classe": sinal, "termo": termo, "url": url, "enquadramento": c, "metade": "A" if int(m, 16) % 2 == 0 else "B"})
-            print(f"  {sinal:26s} {termo[:40]:40s} -> acumulado {n_ok}", flush=True); time.sleep(1.5)
+            print(f"  {sinal:26s} {termo[:40]:40s} -> acumulado {n_ok}", flush=True); time.sleep(2)
         print(f"{sinal}: {n_ok} imagens", flush=True)
+        _csv = BASE / "dados/externos/labels_busca_web.csv"; _old = pd.read_csv(_csv) if _csv.exists() else pd.DataFrame()
+        pd.concat([_old, pd.DataFrame(rows)]).drop_duplicates("file").to_csv(_csv, index=False); rows = []
     saida_csv = BASE / "dados/externos/labels_busca_web.csv"
-    if saida_csv.exists() and a.sinais: rows = pd.read_csv(saida_csv).to_dict("records") + rows
+    if saida_csv.exists(): rows = pd.read_csv(saida_csv).to_dict("records") + rows
     with saida_csv.open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=["file", "subject_id", "source", "domain", *LABELS, "classe", "termo", "url", "enquadramento", "metade"]); w.writeheader(); w.writerows(rows)
     import collections; print("total", len(rows), dict(collections.Counter(r["classe"] for r in rows)))

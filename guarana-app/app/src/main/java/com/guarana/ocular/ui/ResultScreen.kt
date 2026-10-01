@@ -110,7 +110,7 @@ fun ResultScreen(
                         if (grid != null && a.explainW > 0 && a.explainH > 0) HeatOverlay(grid, a.explainW, a.explainH, explainId?.let { a.explainBoxes[it] }, Modifier.matchParentSize())
                     }
                     explainId?.let {
-                        Text("Em vermelho: onde o aplicativo viu \"${Signs.name(it)}\". Toque em outro sinal da lista para ver onde ele apareceu.",
+                        Text("Em azul: onde o aplicativo olhou para dizer \"${Signs.name(it)}\". Toque em outro sinal da lista para ver onde ele apareceu.",
                             style = MaterialTheme.typography.labelSmall, color = G.Ink3, modifier = Modifier.padding(top = 6.dp))
                     }
                 }
@@ -298,7 +298,11 @@ private fun ConfidenceBar(p: Float, thr: Float?) {
  */
 @Composable
 private fun HeatOverlay(grid: FloatArray, gw: Int, gh: Int, box: FloatArray?, modifier: Modifier) {
-    val mn = grid.minOrNull() ?: 0f; val mx = grid.maxOrNull() ?: 1f; val span = (mx - mn).takeIf { it > 1e-6f } ?: 1f
+    // suaviza (media 3x3) e comprime picos (raiz): mapas de atencao sao muito concentrados
+    val g = FloatArray(grid.size) { k -> val i = k % gw; val j = k / gw; var s = 0f; var n = 0
+        for (dj in -1..1) for (di in -1..1) { val ii = i + di; val jj = j + dj; if (ii in 0 until gw && jj in 0 until gh) { s += grid[jj * gw + ii]; n++ } }
+        kotlin.math.sqrt(maxOf(s / n, 0f)) }
+    val mn = g.minOrNull() ?: 0f; val mx = g.maxOrNull() ?: 1f; val span = (mx - mn).takeIf { it > 1e-6f } ?: 1f
     Canvas(modifier) {
         // caixa da vista que deu a probabilidade (fracoes da foto); sem caixa, o recorte central do treino
         val side = if (box != null) box[2] * size.width else minOf(size.width, size.height) * (320f / 352f)
@@ -306,8 +310,8 @@ private fun HeatOverlay(grid: FloatArray, gw: Int, gh: Int, box: FloatArray?, mo
         val y0 = if (box != null) box[1] * size.height else (size.height - side) / 2f
         val cw = side / gw; val ch = side / gh
         for (j in 0 until gh) for (i in 0 until gw) {
-            val t = (grid[j * gw + i] - mn) / span
-            if (t > 0.25f) drawRect(Color(0xFFD9706A).copy(alpha = ((t - 0.25f) / 0.75f) * 0.6f), topLeft = Offset(x0 + i * cw, y0 + j * ch), size = Size(cw + 0.5f, ch + 0.5f))
+            val t = (g[j * gw + i] - mn) / span
+            if (t > 0.35f) drawRect(Color(0xFF2E7DD1).copy(alpha = ((t - 0.35f) / 0.65f) * 0.65f), topLeft = Offset(x0 + i * cw, y0 + j * ch), size = Size(cw + 0.5f, ch + 0.5f))
         }
         drawRect(Color.White.copy(alpha = 0.5f), topLeft = Offset(x0, y0), size = Size(side, side), style = androidx.compose.ui.graphics.drawscope.Stroke(2f))
     }
@@ -337,6 +341,31 @@ private fun confidencePlain(p: Float, thr: Float?): String = when {
 private fun PlainExplanation(a: Analysis, thresholds: Map<String, Float>, unreliable: Set<String>) {
     val present = a.signs.filter { it.state == SignState.present }.sortedByDescending { it.confidence }
     val candidate = a.signs.filter { it.state == SignState.candidate }.sortedByDescending { it.confidence }
+    val pDoente = a.quality.metrics["p_doente"]
+    if (pDoente != null) {   // v2.3+: decisao conservadora e frase fixa a partir da evidencia
+        SoftCard {
+            val corte = a.quality.metrics["corte_doente"] ?: 0.5f
+            val top = present.firstOrNull()
+            if (top == null) {
+                Text("Sem sinais que indiquem avaliação nesta foto.", style = MaterialTheme.typography.titleSmall)
+                Text("O aplicativo usa um corte conservador: na dúvida, ele prefere pedir avaliação. Aqui a chance de alteração ficou abaixo desse corte.",
+                    style = MaterialTheme.typography.bodySmall, color = G.Ink2, modifier = Modifier.padding(top = 4.dp))
+            } else {
+                val where = a.explainWhere.ifBlank { null } ?: wherePlain(a.explain[top.id], a.explainW, a.explainH, a.explainBoxes[top.id])
+                Text("Precisa de avaliação.", style = MaterialTheme.typography.titleSmall)
+                Text("Sinais compatíveis com ${Signs.name(top.id).lowercase()} (${Signs.LEIGO[top.id] ?: Signs.regionPlain(top.id)}), ${"%.0f".format(top.confidence * 100)}% de probabilidade." +
+                    (where?.let { " O aplicativo concentrou a atenção $it." } ?: "") +
+                    (Signs.TIPICO[top.id]?.let { " O sinal típico é $it." } ?: ""),
+                    style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
+                if (candidate.isNotEmpty()) Text("Outras possibilidades: " + candidate.joinToString(", ") { "${Signs.name(it.id).lowercase()} (${"%.0f".format(it.confidence * 100)}%)" } + ".",
+                    style = MaterialTheme.typography.bodySmall, color = G.Ink2, modifier = Modifier.padding(top = 6.dp))
+            }
+            if (a.triageReasons.isNotEmpty()) Text("A indicação também considera a ficha da pessoa (veja acima).", style = MaterialTheme.typography.bodySmall, color = G.Ink2, modifier = Modifier.padding(top = 4.dp))
+            Text("Como funciona: primeiro o aplicativo decide se a foto mostra algo que precisa de avaliação; o nome da condição é a explicação mais provável, não um diagnóstico. A mancha na foto mostra onde ele olhou.",
+                style = MaterialTheme.typography.bodySmall, color = G.Ink3, modifier = Modifier.padding(top = 10.dp))
+        }
+        return
+    }
     SoftCard {
         if (present.isEmpty() && candidate.isEmpty()) {
             Text("Nesta foto o aplicativo não encontrou nenhum dos sinais que ele conhece.", style = MaterialTheme.typography.bodyMedium)

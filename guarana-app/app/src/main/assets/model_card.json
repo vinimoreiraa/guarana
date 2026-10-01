@@ -1,387 +1,61 @@
 {
-  "name": "ocular_v22",
-  "task": "multirrotulo de sinais no olho externo; triagem experimental, sem validacao clinica",
-  "created": "2026-09-30",
-  "backbone": "mobilenetv3_large_100",
+  "name": "ocular_v23",
+  "task": "multiclasse",
+  "created": "2026-10-01",
+  "backbone": "vit_pe_core_small_patch16_384.fb",
+  "classes": [
+    "normal",
+    "alteracao_palpebral",
+    "catarata_leucocoria",
+    "ceratite",
+    "conjuntivite",
+    "hemorragia_subconjuntival",
+    "hiperemia",
+    "ictericia",
+    "lesao_pigmentada",
+    "pterigio",
+    "trauma_ocular",
+    "uveite"
+  ],
   "input": {
-    "name": "image",
-    "shape": [
-      1,
-      3,
-      320,
-      320
-    ],
-    "layout": "NCHW",
-    "color": "RGB",
-    "preprocess": "resize lado menor para 352, center crop 320, /255, normalizar",
+    "size": 384,
     "mean": [
-      0.485,
-      0.456,
-      0.406
+      0.5,
+      0.5,
+      0.5
     ],
     "std": [
-      0.229,
-      0.224,
-      0.225
-    ]
+      0.5,
+      0.5,
+      0.5
+    ],
+    "layout": "NCHW",
+    "range": "0-1 normalizado"
   },
   "output": {
-    "name": "logits",
-    "activation": "sigmoid",
-    "labels": [
-      "hiperemia",
-      "ictericia",
-      "pterigio",
-      "pinguecula",
-      "catarata_leucocoria",
-      "hemorragia_subconjuntival",
-      "lesao_pigmentada",
-      "opacidade_corneana",
-      "tumor_superficie_ocular",
-      "ceratite",
-      "cisto_conjuntival",
-      "lente_intraocular",
-      "conjuntivite",
-      "uveite",
-      "alteracao_palpebral"
-    ]
+    "probs": "softmax por classe, na ordem de classes",
+    "atencao": "mapa 24x24 do pool de atencao (onde o modelo olhou)"
   },
-  "explain": {
-    "name": "cam",
-    "shape": [
-      1,
-      15,
-      10,
-      10
-    ],
-    "note": "logit local por posicao (cabeca aplicada a cada celula do mapa 10x10); softmax espacial nao se aplica, compare celulas pelo valor"
-  },
+  "corte_doente": 0.8028,
+  "regra": "P(doente)=1-P(normal) >= corte_doente -> precisa de avaliacao (sensibilidade alvo 99% no teste separado)",
   "files": {
-    "fp32": "ocular_v22.onnx",
-    "int8": "ocular_v22_int8.onnx",
-    "int8_max_prob_diff": 0.9732,
-    "recommended": "ocular_v22.onnx"
+    "fp32": "ocular_v23.onnx",
+    "recommended": "ocular_v23.onnx"
   },
   "thresholds": {
-    "hiperemia": 0.9109,
-    "ictericia": 0.5706,
-    "pterigio": 0.9391,
-    "pinguecula": 0.1313,
-    "catarata_leucocoria": 0.6808,
-    "hemorragia_subconjuntival": 0.6958,
-    "lesao_pigmentada": 0.9206,
-    "opacidade_corneana": 0.152,
-    "tumor_superficie_ocular": 0.877,
-    "ceratite": 0.6842,
-    "cisto_conjuntival": 0.1403,
-    "lente_intraocular": 0.2729,
-    "conjuntivite": 0.8067,
-    "uveite": 0.6989,
-    "alteracao_palpebral": 0.8562
+    "normal": 0.5,
+    "alteracao_palpebral": 0.5,
+    "catarata_leucocoria": 0.5,
+    "ceratite": 0.5,
+    "conjuntivite": 0.5,
+    "hemorragia_subconjuntival": 0.5,
+    "hiperemia": 0.5,
+    "ictericia": 0.5,
+    "lesao_pigmentada": 0.5,
+    "pterigio": 0.5,
+    "trauma_ocular": 0.5,
+    "uveite": 0.5
   },
-  "target_sensitivity": 0.9,
-  "unreliable_labels": [
-    "ceratite",
-    "cisto_conjuntival",
-    "hemorragia_subconjuntival",
-    "lente_intraocular",
-    "opacidade_corneana",
-    "pinguecula",
-    "tumor_superficie_ocular"
-  ],
-  "counts": {
-    "train": 6576,
-    "val": 1172,
-    "test": 1390,
-    "train_positives": {
-      "hiperemia": 841,
-      "ictericia": 84,
-      "pterigio": 613,
-      "pinguecula": 286,
-      "catarata_leucocoria": 474,
-      "hemorragia_subconjuntival": 149,
-      "lesao_pigmentada": 376,
-      "opacidade_corneana": 440,
-      "tumor_superficie_ocular": 380,
-      "ceratite": 216,
-      "cisto_conjuntival": 82,
-      "lente_intraocular": 95,
-      "conjuntivite": 463,
-      "uveite": 136,
-      "alteracao_palpebral": 278
-    }
-  },
-  "test_metrics": [
-    {
-      "sinal": "hiperemia",
-      "n_pos_teste": 185,
-      "auroc": 0.964,
-      "limiar": 0.392,
-      "sensibilidade": 0.92,
-      "especificidade": 0.87,
-      "confiavel": true
-    },
-    {
-      "sinal": "ictericia",
-      "n_pos_teste": 13,
-      "auroc": 0.991,
-      "limiar": 0.765,
-      "sensibilidade": 0.92,
-      "especificidade": 1.0,
-      "confiavel": true
-    },
-    {
-      "sinal": "pterigio",
-      "n_pos_teste": 126,
-      "auroc": 0.976,
-      "limiar": 0.739,
-      "sensibilidade": 0.93,
-      "especificidade": 0.95,
-      "confiavel": true
-    },
-    {
-      "sinal": "pinguecula",
-      "n_pos_teste": 63,
-      "auroc": 0.962,
-      "limiar": 0.628,
-      "sensibilidade": 0.94,
-      "especificidade": 0.91,
-      "confiavel": true
-    },
-    {
-      "sinal": "catarata_leucocoria",
-      "n_pos_teste": 111,
-      "auroc": 0.974,
-      "limiar": 0.226,
-      "sensibilidade": 0.92,
-      "especificidade": 0.89,
-      "confiavel": true
-    },
-    {
-      "sinal": "hemorragia_subconjuntival",
-      "n_pos_teste": 27,
-      "auroc": 0.978,
-      "limiar": 0.344,
-      "sensibilidade": 0.89,
-      "especificidade": 0.93,
-      "confiavel": true
-    },
-    {
-      "sinal": "lesao_pigmentada",
-      "n_pos_teste": 70,
-      "auroc": 0.957,
-      "limiar": 0.585,
-      "sensibilidade": 0.86,
-      "especificidade": 0.88,
-      "confiavel": true
-    },
-    {
-      "sinal": "opacidade_corneana",
-      "n_pos_teste": 85,
-      "auroc": 0.998,
-      "limiar": 0.841,
-      "sensibilidade": 0.95,
-      "especificidade": 0.99,
-      "confiavel": true
-    },
-    {
-      "sinal": "tumor_superficie_ocular",
-      "n_pos_teste": 85,
-      "auroc": 0.98,
-      "limiar": 0.9,
-      "sensibilidade": 0.86,
-      "especificidade": 0.95,
-      "confiavel": true
-    },
-    {
-      "sinal": "ceratite",
-      "n_pos_teste": 31,
-      "auroc": 0.983,
-      "limiar": 0.396,
-      "sensibilidade": 0.94,
-      "especificidade": 0.97,
-      "confiavel": true
-    },
-    {
-      "sinal": "cisto_conjuntival",
-      "n_pos_teste": 15,
-      "auroc": 0.996,
-      "limiar": 0.9,
-      "sensibilidade": 0.93,
-      "especificidade": 0.99,
-      "confiavel": true
-    },
-    {
-      "sinal": "lente_intraocular",
-      "n_pos_teste": 16,
-      "auroc": 0.981,
-      "limiar": 0.857,
-      "sensibilidade": 0.88,
-      "especificidade": 1.0,
-      "confiavel": true
-    },
-    {
-      "sinal": "conjuntivite",
-      "n_pos_teste": 113,
-      "auroc": 0.978,
-      "limiar": 0.159,
-      "sensibilidade": 0.93,
-      "especificidade": 0.9,
-      "confiavel": true
-    },
-    {
-      "sinal": "uveite",
-      "n_pos_teste": 31,
-      "auroc": 0.973,
-      "limiar": 0.85,
-      "sensibilidade": 0.84,
-      "especificidade": 0.99,
-      "confiavel": true
-    },
-    {
-      "sinal": "alteracao_palpebral",
-      "n_pos_teste": 57,
-      "auroc": 0.946,
-      "limiar": 0.161,
-      "sensibilidade": 0.88,
-      "especificidade": 0.9,
-      "confiavel": true
-    }
-  ],
-  "sources": [
-    "A_cekmate",
-    "A_commons",
-    "A_commons_olho",
-    "A_gh_eyedis5",
-    "A_hf_pinkeye",
-    "A_hf_retinoblastoma",
-    "A_mendeley_blefarite",
-    "A_mendeley_conj",
-    "A_pubmed",
-    "A_zenodo_eyearea",
-    "cfd",
-    "colagem",
-    "conj_seg",
-    "eye_diseases",
-    "faridpur",
-    "hf_jaundice",
-    "hf_pterygium",
-    "slid"
-  ],
-  "license_note": "conferir a licenca de cada fonte antes de qualquer uso alem de pesquisa/competicao",
-  "thresholds_sens90": {
-    "hiperemia": 0.39163142442703247,
-    "ictericia": 0.7653098702430725,
-    "pterigio": 0.7385138869285583,
-    "pinguecula": 0.6283924579620361,
-    "catarata_leucocoria": 0.2262285053730011,
-    "hemorragia_subconjuntival": 0.34416520595550537,
-    "lesao_pigmentada": 0.5847268104553223,
-    "opacidade_corneana": 0.8405417799949646,
-    "tumor_superficie_ocular": 0.9,
-    "ceratite": 0.39648890495300293,
-    "cisto_conjuntival": 0.9,
-    "lente_intraocular": 0.8565858602523804,
-    "conjuntivite": 0.15918122231960297,
-    "uveite": 0.8497164249420166,
-    "alteracao_palpebral": 0.16102361679077148
-  },
-  "threshold_rule": "especificidade >= 0.985 em normais reais de celular (Zenodo+Commons, metade B1) (recalibrar_limiares.py)",
-  "thresholds_candidato": {
-    "hiperemia": 0.6503,
-    "ictericia": 0.1052,
-    "pterigio": 0.6565,
-    "pinguecula": 0.08,
-    "catarata_leucocoria": 0.4568,
-    "hemorragia_subconjuntival": 0.3383,
-    "lesao_pigmentada": 0.682,
-    "opacidade_corneana": 0.08,
-    "tumor_superficie_ocular": 0.2453,
-    "ceratite": 0.08,
-    "cisto_conjuntival": 0.08,
-    "lente_intraocular": 0.08,
-    "conjuntivite": 0.6298,
-    "uveite": 0.1462,
-    "alteracao_palpebral": 0.4119
-  },
-  "threshold_rule_candidato": "especificidade >= 0.92 nos mesmos normais reais",
-  "nota_v22": "v2.2 = E4a: v2.1 + metade A (por sujeito) de 9 fontes externas reais (1.664 fotos). Limiares calibrados em normais reais de celular: presente 98,5% de especificidade, candidato 92%. Metade B das mesmas fontes e teste (saida/comparacao_externos.md).",
-  "domain_positives": {
-    "hiperemia": {
-      "treino_foto_comum": 568,
-      "treino_lampada_fenda": 240,
-      "teste_foto_comum": 139
-    },
-    "ictericia": {
-      "treino_foto_comum": 81,
-      "treino_lampada_fenda": 0,
-      "teste_foto_comum": 13
-    },
-    "pterigio": {
-      "treino_foto_comum": 495,
-      "treino_lampada_fenda": 113,
-      "teste_foto_comum": 97
-    },
-    "pinguecula": {
-      "treino_foto_comum": 0,
-      "treino_lampada_fenda": 286,
-      "teste_foto_comum": 0
-    },
-    "catarata_leucocoria": {
-      "treino_foto_comum": 285,
-      "treino_lampada_fenda": 159,
-      "teste_foto_comum": 67
-    },
-    "hemorragia_subconjuntival": {
-      "treino_foto_comum": 7,
-      "treino_lampada_fenda": 133,
-      "teste_foto_comum": 3
-    },
-    "lesao_pigmentada": {
-      "treino_foto_comum": 70,
-      "treino_lampada_fenda": 305,
-      "teste_foto_comum": 16
-    },
-    "opacidade_corneana": {
-      "treino_foto_comum": 0,
-      "treino_lampada_fenda": 432,
-      "teste_foto_comum": 0
-    },
-    "tumor_superficie_ocular": {
-      "treino_foto_comum": 39,
-      "treino_lampada_fenda": 341,
-      "teste_foto_comum": 5
-    },
-    "ceratite": {
-      "treino_foto_comum": 0,
-      "treino_lampada_fenda": 173,
-      "teste_foto_comum": 0
-    },
-    "cisto_conjuntival": {
-      "treino_foto_comum": 0,
-      "treino_lampada_fenda": 82,
-      "teste_foto_comum": 0
-    },
-    "lente_intraocular": {
-      "treino_foto_comum": 0,
-      "treino_lampada_fenda": 91,
-      "teste_foto_comum": 0
-    },
-    "conjuntivite": {
-      "treino_foto_comum": 440,
-      "treino_lampada_fenda": 0,
-      "teste_foto_comum": 108
-    },
-    "uveite": {
-      "treino_foto_comum": 118,
-      "treino_lampada_fenda": 0,
-      "teste_foto_comum": 30
-    },
-    "alteracao_palpebral": {
-      "treino_foto_comum": 222,
-      "treino_lampada_fenda": 0,
-      "teste_foto_comum": 44
-    }
-  },
-  "unreliable_note": "rotulos com menos de 40 positivos de treino em foto comum (web/celular): o desempenho medido vale para lampada de fenda, nao para a camera do tablet"
+  "unreliable_labels": [],
+  "nota": "Decisao conservadora saudavel x precisa de avaliacao; doencas como explicacao. Teste separado e Google nunca visto em saida/doencas_vit_pe_core_small_patch16_384_geral.md"
 }
