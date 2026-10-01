@@ -1,0 +1,32 @@
+# ambientes e builds
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+**/build/
+**/.gradle/
+**/.idea/
+**/.kotlin/
+**/local.properties
+*.apk
+*.aab
+*.keystore
+*.jks
+
+# dados de terceiros (licenças variadas, várias proíbem redistribuição) e pesos treinados
+dados/
+saida/
+validacao/casos/*.jpg
+validacao/casos/*.png
+validacao/conjunto/
+app-logs/
+
+# síntese: renders e assets baixados (licenças próprias, ver sintese/assets/*/LICENCAS.md no local)
+sintese/render/
+sintese/assets/
+sintese/saida_teste/
+sintese/embrulho_jobs/
+
+# modelos dentro do app: ficam fora do git (grandes); gerar com treino/publicar_modelo.sh
+guarana-app/app/src/main/assets/*.onnx
+firmware/build/

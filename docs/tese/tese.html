@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Guaraná: tese</title>
+<style>
+  @page { size: A4; margin: 16mm 16mm 18mm 16mm; }
+  :root { --red:#D9706A; --leaf:#5E9E6A; --ink:#2B2320; --muted:#6B605B; --bg:#FBF7F3; --line:#E8DDD5; --soft:#F6EDE6; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, "SF Pro Text", "Helvetica Neue", Arial, sans-serif; color: var(--ink); font-size: 10.5pt; line-height: 1.45; margin: 0; }
+  h1 { font-size: 30pt; line-height: 1.05; margin: 0 0 8px; letter-spacing: -0.5px; }
+  h2 { font-size: 17pt; margin: 0 0 10px; color: var(--ink); letter-spacing: -0.2px; }
+  h2 small { display:block; font-size: 9pt; color: var(--red); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin-bottom: 4px; }
+  h3 { font-size: 11.5pt; margin: 14px 0 6px; }
+  p { margin: 0 0 8px; }
+  .page { page-break-after: always; }
+  .page:last-child { page-break-after: auto; }
+  .cover { height: 260mm; display: flex; flex-direction: column; justify-content: space-between; background: var(--bg); margin: -16mm -16mm 0; padding: 26mm 20mm; }
+  .cover .logo { width: 70px; }
+  .cover .tag { color: var(--red); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; font-size: 9pt; }
+  .cover .lead { font-size: 15pt; color: var(--muted); max-width: 150mm; }
+  .cover .foot { font-size: 9pt; color: var(--muted); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+  .card { background: var(--soft); border-radius: 10px; padding: 10px 12px; }
+  .card b.big { display:block; font-size: 20pt; color: var(--red); line-height: 1.1; }
+  .card .src { font-size: 7.5pt; color: var(--muted); margin-top: 3px; }
+  .flow { display:flex; align-items: stretch; gap: 6px; margin: 8px 0 10px; }
+  .flow div { flex:1; background: var(--soft); border-radius: 8px; padding: 8px; font-size: 9pt; }
+  .flow div b { display:block; color: var(--red); font-size: 9.5pt; }
+  .arrow { flex: 0 0 auto !important; background: none !important; align-self: center; color: var(--muted); padding: 0 !important; }
+  table { width: 100%; border-collapse: collapse; font-size: 9pt; margin: 6px 0 10px; }
+  th, td { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 8.5pt; }
+  td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.hl td { background: #FBEAE7; font-weight: 600; }
+  .shots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .shots figure { margin: 0; }
+  .shots img { width: 100%; border-radius: 10px; border: 1px solid var(--line); display: block; }
+  .shots figcaption { font-size: 8pt; color: var(--muted); margin-top: 3px; line-height: 1.25; }
+  .note { font-size: 8.5pt; color: var(--muted); border-left: 3px solid var(--line); padding-left: 8px; margin: 6px 0; }
+  .pill { display:inline-block; background: var(--soft); border-radius: 20px; padding: 1px 8px; font-size: 8.5pt; margin: 1px 2px 1px 0; }
+  .ok { color: var(--leaf); font-weight: 600; }
+  .warn { color: #B4572F; font-weight: 600; }
+  ul { margin: 0 0 8px 16px; padding: 0; } li { margin: 0 0 3px; }
+  .quote { font-size: 13pt; line-height: 1.35; color: var(--ink); border-left: 4px solid var(--red); padding: 4px 0 4px 12px; margin: 10px 0 14px; }
+  .hw { display:grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .hw div { border: 1px solid var(--line); border-radius: 10px; padding: 8px; font-size: 9pt; }
+  .hw div b { display:block; margin-bottom: 3px; }
+  .hw .now { background: #EEF5EF; border-color: #CFE3D2; }
+  .ref { font-size: 7.5pt; color: var(--muted); }
+</style>
+</head>
+<body>
+
+<!-- CAPA -->
+<section class="page cover">
+  <div>
+    <svg class="logo" viewBox="30 22 48 62" xmlns="http://www.w3.org/2000/svg">
+      <path fill="#9CC3A0" d="M56,38 Q58,25 69,24 Q68,36 56,38 Z"/>
+      <circle cx="54" cy="61" r="22" fill="#D9706A"/><circle cx="54" cy="61" r="12" fill="#FFF9F3"/><circle cx="54" cy="61" r="7" fill="#2B2320"/>
+    </svg>
+    <p class="tag" style="margin-top:28px">Guaraná · Tese do produto · 30/09/2026</p>
+    <h1>Um oftalmologista de bolso<br>dentro da visita que já acontece.</h1>
+    <p class="lead">Triagem de doenças do olho externo, com foto comum e sem internet, embutida de forma discreta no fluxo do agente comunitário de saúde no e-SUS.</p>
+  </div>
+  <div class="foot">Documento de trabalho. Os números de desempenho são de testes em fotos públicas da internet, não de validação clínica. Triagem, nunca diagnóstico.</div>
+</section>
+
+<!-- RESUMO -->
+<section class="page">
+  <h2><small>Em uma página</small>A tese</h2>
+  <p class="quote">O Brasil já tem uma rede que bate em todas as portas todo mês: o agente comunitário de saúde. O que falta é olho treinado. O Guaraná coloca esse olho no tablet que o agente já carrega, dentro do sistema que ele já usa, funcionando onde não há sinal.</p>
+  <div class="grid2">
+    <div>
+      <h3>Problema</h3>
+      <p>Cegueira e baixa visão evitáveis no Brasil se concentram onde não há oftalmologista: Norte, Nordeste, zona rural, ribeirinhos e povos indígenas. Doenças visíveis a olho nu (pterígio, catarata avançada, conjuntivite, icterícia, leucocoria na criança, ceratite) chegam tarde à UBS porque ninguém olhou com método.</p>
+      <h3>Solução</h3>
+      <p>Na visita domiciliar, o agente toca uma pílula discreta sobre o e-SUS Território, fotografa um olho, e em segundos recebe uma triagem em linguagem simples (sem sinais, observar, encaminhar, encaminhar com urgência), já cruzada com a ficha da pessoa. O registro volta para o e-SUS.</p>
+    </div>
+    <div>
+      <h3>Por que agora e por que nós</h3>
+      <ul>
+        <li><b>Sem internet.</b> O modelo roda no aparelho. A nuvem é segunda opinião quando houver sinal.</li>
+        <li><b>Sem novo fluxo.</b> Entra no e-SUS que o ACS já usa, em vez de pedir mais um app e mais um cadastro.</li>
+        <li><b>Sem hardware obrigatório.</b> Funciona com a câmera do tablet. O anel de luz é a v0 de uma lente que expande para fundo de olho.</li>
+        <li><b>Explicável.</b> Mostra onde viu o sinal e por quê, em português de quem não é médico.</li>
+      </ul>
+      <h3>Onde estamos</h3>
+      <p>App Android funcional, integração com e-SUS demonstrada num simulador fiel, modelo local publicado, banco de 15 arquiteturas com régua honesta: <b>92,4% de acurácia média em fotos do Google nunca vistas</b> nas 4 condições com dados suficientes.</p>
+    </div>
+  </div>
+</section>
+
+<!-- PROBLEMA -->
+<section class="page">
+  <h2><small>Problema</small>O olho que ninguém examina</h2>
+  <p>O Brasil não tem inquérito nacional de saúde ocular. Os dados que existem mostram desigualdade grande entre o centro e as bordas do país, e doenças que são visíveis na superfície do olho chegando tarde ao sistema.</p>
+  <div class="grid3">
+    <div class="card"><b class="big">58,75%</b>dos adultos de 45 anos ou mais em Parintins (AM) têm pterígio.<div class="src">BARES, Sci Rep 2021</div></div>
+    <div class="card"><b class="big">36% × 58%</b>cobertura de cirurgia de catarata em Parintins contra São Paulo.<div class="src">Semin Ophthalmol 2023</div></div>
+    <div class="card"><b class="big">~208 mil</b>pessoas na fila de cirurgia de catarata.<div class="src">TCU 2026</div></div>
+    <div class="card"><b class="big">76–78%</b>dos retinoblastomas no Brasil são diagnosticados já avançados. O sinal é leucocoria, visível numa foto com flash.<div class="src">BMC Pediatr 2016; RCBP/INCA</div></div>
+    <div class="card"><b class="big">22.129</b>casos novos de hanseníase em 2024, segundo maior número do mundo; o olho é acometido em grande parte dos casos.<div class="src">Boletim MS, jan/2026</div></div>
+    <div class="card"><b class="big">28.650</b>pessoas na fila de transplante de córnea; ceratite fúngica por trauma vegetal é típica da zona rural.<div class="src">ABTO 2024; ABO 2012</div></div>
+  </div>
+  <h3>Por que a atenção primária não pega isso hoje</h3>
+  <ul>
+    <li>O ACS visita todas as famílias do território, mas não é treinado para reconhecer sinais oculares e não tem instrumento para isso.</li>
+    <li>A UBS encaminha por queixa. Doença sem dor (pterígio inicial, catarata, leucocoria) não vira queixa.</li>
+    <li>Onde a prevalência é maior, não há sinal de internet estável, então soluções de nuvem não chegam.</li>
+    <li>Ferramentas novas que exigem outro app, outro login e outro cadastro morrem na rotina do ACS.</li>
+  </ul>
+  <p class="ref">Fontes completas (249 referências) em dados/pesquisa/epidemiologia_brasil.md.</p>
+</section>
+
+<!-- SOLUÇÃO + FLUXO -->
+<section class="page">
+  <h2><small>Solução</small>Encaixar no fluxo que já existe</h2>
+  <p>O grande valor do Guaraná não é um modelo de IA. É <b>onde</b> ele aparece: dentro da visita domiciliar, no e-SUS Território, sem pedir que o agente mude o que já faz.</p>
+  <div class="flow">
+    <div><b>1. Visita</b>O ACS abre a ficha da pessoa no e-SUS, como sempre.</div><div class="arrow">→</div>
+    <div><b>2. Pílula</b>Uma pílula discreta aparece na lateral. Um toque no olho abre a câmera.</div><div class="arrow">→</div>
+    <div><b>3. Foto</b>O app guia: aproxime, um olho por vez, sem reflexo. Recusa foto ruim.</div><div class="arrow">→</div>
+    <div><b>4. Triagem</b>Em segundos, no aparelho, sem internet. Linguagem simples.</div><div class="arrow">→</div>
+    <div><b>5. Registro</b>Volta ao e-SUS com o resumo e os motivos da visita.</div>
+  </div>
+  <div class="shots" style="grid-template-columns: repeat(4, 1fr);">
+    <figure><img src="img/10_esus_pilula.png"><figcaption>A pílula do Guaraná (logo e olho) flutuando sobre o e-SUS Território.</figcaption></figure>
+    <figure><img src="img/05_captura.png"><figcaption>Captura com moldura, zoom, foco e rotina de luz do anel.</figcaption></figure>
+    <figure><img src="img/06_resultado.png"><figcaption>Resultado: faixa de triagem, onde o sinal foi visto e a regra pela ficha do cidadão.</figcaption></figure>
+    <figure><img src="img/09_resultado_esus.png"><figcaption>Registrar no e-SUS, copiar resumo, exportar PDF ou FHIR, voltar sem registrar.</figcaption></figure>
+  </div>
+  <p class="note">Esta captura mostra o modelo antigo (v2.2) errando o pterígio vermelho como uveíte. O modelo novo do banco (Perception Encoder) acerta essa mesma foto com 0,92. Mantivemos a tela como está porque é a que roda hoje no aparelho.</p>
+</section>
+
+<!-- PROPOSTA DE VALOR -->
+<section class="page">
+  <h2><small>Proposta de valor</small>Para cada pessoa da cadeia</h2>
+  <table>
+    <tr><th>Quem</th><th>O que ganha</th><th>Como o Guaraná entrega</th></tr>
+    <tr><td><b>Pessoa atendida</b></td><td>Doença pega cedo, sem sair de casa nem viajar até um especialista para ser triada.</td><td>Foto na visita; encaminhamento só quando precisa.</td></tr>
+    <tr><td><b>Agente comunitário</b></td><td>Um "olho de especialista" no bolso, sem mais trabalho.</td><td>Pílula dentro do e-SUS; resposta em português simples; registro automático.</td></tr>
+    <tr><td><b>Equipe da UBS</b></td><td>Lista priorizada de quem precisa de avaliação, com foto e motivo.</td><td>Triagem em 4 faixas; regras pela ficha (diabético sem fundo de olho há 12 meses, hanseníase, deficiência visual).</td></tr>
+    <tr><td><b>Gestor municipal e estadual</b></td><td>Mapa real de demanda oftalmológica por território.</td><td>Agregação dos resultados por bairro e microárea; base para planejar mutirões e missões.</td></tr>
+    <tr><td><b>Oftalmologista</b></td><td>Chega a ele quem realmente precisa, já com foto.</td><td>Encaminhamento com imagem e evidência; segunda opinião na nuvem quando houver sinal.</td></tr>
+  </table>
+  <h3>Três escolhas de projeto que sustentam a proposta</h3>
+  <div class="grid3">
+    <div class="card"><b>Integração limpa e discreta</b><br>Nada de novo login ou cadastro paralelo. A pílula só aparece quando o e-SUS está aberto, some quando não é usada e o botão voltar devolve ao e-SUS.</div>
+    <div class="card"><b>Offline por padrão</b><br>Todos os modelos (enquadramento, segmentação, sinais) rodam no tablet em menos de 1 s. A nuvem é opcional e assíncrona.</div>
+    <div class="card"><b>Explicável para leigo</b><br>"Viu vermelhidão na parte branca do olho, à direita. Muito provável (91%)." Os números técnicos ficam atrás de um ícone de expandir.</div>
+  </div>
+</section>
+
+<!-- TELAS -->
+<section class="page">
+  <h2><small>Produto</small>O app hoje</h2>
+  <div class="shots">
+    <figure><img src="img/01_inicio.png"><figcaption><b>Início</b>: resumo do dia, visitas pendentes e casos a encaminhar.</figcaption></figure>
+    <figure><img src="img/03_agenda.png"><figcaption><b>Agenda</b>: visitas ordenadas por prioridade ocular e tempo sem visita.</figcaption></figure>
+    <figure><img src="img/02_territorio.png"><figcaption><b>Território</b>: bairros e imóveis prioritários, na hierarquia do e-SUS.</figcaption></figure>
+    <figure><img src="img/02b_bairro.png"><figcaption><b>Bairro</b>: logradouros e imóveis, como no e-SUS; mapa da área baixável para uso offline.</figcaption></figure>
+    <figure><img src="img/04_pacientes.png"><figcaption><b>Pacientes</b>: busca por nome, código ou CNS, histórico de análises.</figcaption></figure>
+    <figure><img src="img/07_resultado_sinais.png"><figcaption><b>Sinais avaliados</b>: cada sinal com estado, região e confiança.</figcaption></figure>
+    <figure><img src="img/08_resultado_explicacao.png"><figcaption><b>Por que o app disse isso</b>: explicação em linguagem simples; detalhes técnicos sob demanda.</figcaption></figure>
+    <figure><img src="img/12_ajustes.png"><figcaption><b>Ajustes</b>: nuvem opcional, território, flash do tablet e anel de luz.</figcaption></figure>
+  </div>
+</section>
+
+<!-- TECNICALIDADES -->
+<section class="page">
+  <h2><small>Como funciona</small>Do pixel à triagem</h2>
+  <div class="flow">
+    <div><b>Enquadramento</b>Detector próprio recusa foto longe, com dois olhos ou sem olho.</div><div class="arrow">→</div>
+    <div><b>Qualidade</b>Nitidez, luz e reflexo; troca para o quadro sem flash se houver reflexo.</div><div class="arrow">→</div>
+    <div><b>Segmentação</b>Fenda e íris (IoU 0,92 / 0,94): onde está a esclera.</div><div class="arrow">→</div>
+    <div><b>Sinais</b>Classificador de 15 sinais, várias vistas, mapa de onde viu.</div><div class="arrow">→</div>
+    <div><b>Triagem</b>Regras por sinal mais regras pela ficha do cidadão.</div>
+  </div>
+  <h3>Dois ramos que se completam</h3>
+  <div class="grid2">
+    <div class="card"><b>Ramo B · reconhecimento</b><br>Rede neural treinada em ~6.500 fotos públicas de 18 fontes, com máscara de rótulos por fonte e simulação de "foto de tela". Reconhece forma e padrão: pterígio, catarata, conjuntivite, lesões, pálpebra.</div>
+    <div class="card"><b>Ramo A · absorbância de luz</b><br>Cor medida na esclera: bilirrubina absorve azul, hemoglobina absorve verde. Mesmo em foto comum sem controle de luz já separa icterícia de olho normal com AUROC 0,90 e vermelhidão com 0,88. Com o anel de luz e referência de branco vira medição calibrável.</div>
+  </div>
+  <h3>Régua de avaliação, sem maquiagem</h3>
+  <p>Toda fonte nova é dividida por paciente em metade de treino e metade de teste permanente. O número que importa é a acurácia em fotos de fontes que o modelo nunca viu, com a mesma quantidade de fotos por classe.</p>
+  <table>
+    <tr><th>Experimento: 4 condições, 300 fotos de treino e 200 de teste por classe</th><th class="n">Teste separado</th><th class="n">Fotos do Google nunca vistas<br>(média das 4 classes)</th></tr>
+    <tr><td>MobileNetV3 só com bases públicas (modelo do app até hoje)</td><td class="n">89,1%</td><td class="n">52%*</td></tr>
+    <tr><td>MobileNetV3 + fotos da busca de imagens</td><td class="n">85,9%</td><td class="n">77,6%</td></tr>
+    <tr class="hl"><td>Perception Encoder S (Meta, 24M parâmetros, Apache-2.0)</td><td class="n">91,2%</td><td class="n">92,4%</td></tr>
+    <tr><td>ConvNeXt-T ImageNet-22k</td><td class="n">91,1%</td><td class="n">92,1%</td></tr>
+    <tr><td>EVA-02 S</td><td class="n">90,9%</td><td class="n">91,7%</td></tr>
+    <tr><td>VisionFM olho externo (modelo de fundação oftálmico)</td><td class="n">90,5%</td><td class="n">89,1%</td></tr>
+  </table>
+  <p class="note">* Medido em 3 classes, antes da coleta de olhos normais. O Perception Encoder roda em 39 ms na CPU do Mac; no tablet ainda será medido. Banco completo de 15 arquiteturas em saida/bench_arquiteturas.md. Limite: só 4 condições têm 500 fotos comuns; as demais (uveíte, icterícia, pálpebra, hemorragia, ceratite) seguem com validação parcial.</p>
+</section>
+
+<!-- FEATURES -->
+<section class="page">
+  <h2><small>Features</small>O que já está pronto e o que vem</h2>
+  <table>
+    <tr><th>Feature</th><th>Status</th></tr>
+    <tr><td>Triagem de 15 sinais do olho externo, offline, com mapa de onde viu</td><td class="ok">pronto (v2.2; v2.3 com o novo modelo em preparo)</td></tr>
+    <tr><td>Guia de captura: aproxime, um olho por vez, recusa foto ruim, troca o quadro com reflexo</td><td class="ok">pronto</td></tr>
+    <tr><td>Explicação em linguagem simples, números técnicos sob demanda</td><td class="ok">pronto</td></tr>
+    <tr><td>Triagem cruzada com a ficha (diabetes sem fundo de olho, hanseníase, deficiência visual, hipertensão)</td><td class="ok">pronto</td></tr>
+    <tr><td>Pílula flutuante sobre o e-SUS Território; voltar devolve ao e-SUS</td><td class="ok">pronto</td></tr>
+    <tr><td>Território, agenda priorizada e mapa offline na hierarquia do e-SUS</td><td class="ok">pronto</td></tr>
+    <tr><td>Exportação em PDF, FHIR (RNDS) e pacote protegido por senha</td><td class="ok">pronto</td></tr>
+    <tr><td>Validação automática no aparelho a partir de uma pasta de fotos</td><td class="ok">pronto</td></tr>
+    <tr><td>Anel de luz (ESP32) controlado pelo app; índices de cor na esclera</td><td class="ok">pronto (v0)</td></tr>
+    <tr><td>Preenchimento automático da Ficha de Visita no e-SUS a partir do resultado</td><td class="warn">em andamento</td></tr>
+    <tr><td>Segunda opinião na nuvem com modelos grandes (contrato e cliente prontos, servidor a montar)</td><td class="warn">em andamento</td></tr>
+    <tr><td>Planejamento de missões e mutirões a partir do mapa de achados</td><td class="warn">não implementado</td></tr>
+    <tr><td>Lente para fundo de olho e controle de cor calibrado</td><td class="warn">roadmap de hardware</td></tr>
+  </table>
+  <h3>Planejamento de missões (a construir)</h3>
+  <p>Cada triagem é georreferenciada no território do e-SUS. Somadas, viram um mapa de demanda: quantos pterígios cirúrgicos em cada comunidade ribeirinha, quantas cataratas maduras por município, onde há crianças com leucocoria a confirmar. Isso permite dimensionar e roteirizar mutirões de catarata e pterígio, barcos e carretas de saúde, e medir depois se a fila caiu. É a ponte entre a visita do ACS e a decisão do gestor.</p>
+</section>
+
+<!-- HARDWARE -->
+<section class="page">
+  <h2><small>Hardware</small>De um anel de luz a uma lente</h2>
+  <p>O app funciona só com a câmera do tablet. O hardware entra para o que a câmera sozinha não faz: luz controlada e, depois, ver o fundo do olho.</p>
+  <div class="hw">
+    <div class="now"><b>v0 · hoje</b>Anel de LEDs RGB (ESP32) ligado por USB, Bluetooth ou Wi-Fi. O app dispara a sequência branco, azul, vermelho e sem luz, com exposição travada, e mede a cor da esclera com o ambiente subtraído.</div>
+    <div><b>v1 · controle de cor</b>Referência de branco no quadro e calibração por aparelho. O índice de cor vira absorbância e, com coleta junto a exames de laboratório, estimativa de bilirrubina e hemoglobina.</div>
+    <div><b>v2 · lente de segmento anterior</b>Lente macro acoplável com luz coaxial e azul-cobalto: córnea, úlcera, fluoresceína e catarata com detalhe de consultório.</div>
+    <div><b>v3 · fundo de olho</b>Adaptador de retinografia para celular: retinopatia diabética e glaucoma, as maiores causas de cegueira irreversível, que hoje o Guaraná só prioriza pela ficha.</div>
+  </div>
+  <h3>Por que isso importa</h3>
+  <ul>
+    <li>As quatro maiores causas de cegueira no Brasil (catarata, erro refrativo, glaucoma, retinopatia diabética) quase não aparecem numa foto do olho externo. A lente é o que leva o Guaraná até elas.</li>
+    <li>O mesmo app, o mesmo fluxo no e-SUS e o mesmo agente. Cada versão do hardware só acrescenta um modo de captura.</li>
+    <li>Prova de princípio do ramo de cor com laboratório real: em fotos de recém-nascidos com cartão de cor, o índice calibrado correlaciona com a bilirrubina sérica (Spearman 0,73; AUROC 0,88 para bilirrubina ≥ 12).</li>
+  </ul>
+</section>
+
+<!-- IMPACTO -->
+<section class="page">
+  <h2><small>Impacto</small>Capacidade de escala</h2>
+  <div class="grid2">
+    <div>
+      <h3>Por que escala</h3>
+      <ul>
+        <li><b>A rede já existe.</b> O ACS visita todas as famílias do seu território, e o e-SUS Território é o sistema oficial dessa visita. O Guaraná não precisa criar canal nem convencer a pessoa a ir à UBS.</li>
+        <li><b>Custo marginal perto de zero.</b> Software no tablet que o agente já tem; o hardware é opcional.</li>
+        <li><b>Funciona onde o problema é maior.</b> Offline, pensado para Norte, Nordeste, zona rural e ribeirinhos.</li>
+        <li><b>Encaixa nas políticas existentes.</b> Política Nacional de Atenção em Oftalmologia, eliminação do tracoma, estratégia de hanseníase, suplementação de vitamina A e triagem de retinopatia no diabético já preveem ações na atenção primária.</li>
+      </ul>
+    </div>
+    <div>
+      <h3>O que muda na ponta</h3>
+      <ul>
+        <li><b>Mais cedo:</b> leucocoria na criança e ceratite na zona rural chegam antes da perda irreversível.</li>
+        <li><b>Mais certo:</b> a UBS encaminha quem precisa, com foto, em vez de por queixa.</li>
+        <li><b>Mais visível:</b> o gestor passa a ver demanda oftalmológica por território, a base para planejar mutirões e medir fila.</li>
+        <li><b>Mais justo:</b> o acesso deixa de depender de morar perto de um oftalmologista.</li>
+      </ul>
+    </div>
+  </div>
+  <h3>O que ainda precisamos provar</h3>
+  <ul>
+    <li>Validação clínica prospectiva com oftalmologista, em campo, com ACS reais.</li>
+    <li>Desempenho acima de 90% nas condições com poucos dados públicos (uveíte, icterícia, pálpebra, hemorragia, ceratite).</li>
+    <li>Integração oficial com o e-SUS (hoje demonstrada num simulador fiel às telas reais) e caminho regulatório (ANVISA, LGPD).</li>
+  </ul>
+  <p class="note">Guaraná é ferramenta de triagem e apoio à decisão. Não faz diagnóstico e não substitui o oftalmologista.</p>
+</section>
+
+</body>
+</html>
