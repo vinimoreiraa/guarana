@@ -9,7 +9,7 @@ import kotlin.math.ln
 import kotlin.math.max
 
 /**
- * Ramo A do Ocular.IA: medicao de cor por reflectancia multiespectral.
+ * Ramo A do Guaraná: medicao de cor por reflectancia multiespectral.
  *
  * Entrada: os quadros da rotina de luz (branco, azul, vermelho e ambiente sem LED), fotografados com exposicao
  * e balanco de branco travados. Saida: indices relativos, SEM calibracao clinica:

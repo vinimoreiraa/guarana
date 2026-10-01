@@ -6,7 +6,7 @@ def md(s): cells.append({"cell_type": "markdown", "metadata": {}, "source": s.st
 def code(s): cells.append({"cell_type": "code", "metadata": {}, "execution_count": None, "outputs": [], "source": s.strip("\n")})
 
 md('''
-# Ocular.IA, treino do classificador local (v1)
+# Guaraná, treino do classificador local (v1)
 
 Treina um classificador **multirrótulo** de sinais no olho externo (foto comum, sem lente) e exporta para **ONNX** para rodar offline no tablet Android com ONNX Runtime.
 
@@ -47,8 +47,8 @@ if IN_COLAB:
 code('''
 from pathlib import Path
 _BASE = Path(__file__).resolve().parents[1] if "__file__" in globals() else Path("..").resolve()
-DATA_DIR = Path("/content/drive/MyDrive/ocular-ia/dados") if IN_COLAB else _BASE / "dados"
-OUT_DIR  = Path("/content/drive/MyDrive/ocular-ia/saida") if IN_COLAB else _BASE / "saida"
+DATA_DIR = Path("/content/drive/MyDrive/guarana/dados") if IN_COLAB else _BASE / "dados"
+OUT_DIR  = Path("/content/drive/MyDrive/guarana/saida") if IN_COLAB else _BASE / "saida"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 SMOKE = os.environ.get("OCULAR_SMOKE") == "1"     # teste rapido do pipeline: poucas imagens, 1 epoca
 

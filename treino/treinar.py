@@ -19,8 +19,8 @@ if IN_COLAB:
 # %% ---------------------------------------------
 from pathlib import Path
 _BASE = Path(__file__).resolve().parents[1] if "__file__" in globals() else Path("..").resolve()
-DATA_DIR = Path("/content/drive/MyDrive/ocular-ia/dados") if IN_COLAB else _BASE / "dados"
-OUT_DIR  = Path("/content/drive/MyDrive/ocular-ia/saida") if IN_COLAB else _BASE / "saida"
+DATA_DIR = Path("/content/drive/MyDrive/guarana/dados") if IN_COLAB else _BASE / "dados"
+OUT_DIR  = Path("/content/drive/MyDrive/guarana/saida") if IN_COLAB else _BASE / "saida"
 OUT_DIR.mkdir(parents=True, exist_ok=True)
 SMOKE = os.environ.get("OCULAR_SMOKE") == "1"     # teste rapido do pipeline: poucas imagens, 1 epoca
 

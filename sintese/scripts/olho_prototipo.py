@@ -1,5 +1,5 @@
 """
-Protótipo de olho paramétrico para dados sintéticos (Guaraná / Ocular.IA).
+Protótipo de olho paramétrico para dados sintéticos (Guaraná).
 Blender 5.x, headless:
   /Applications/Blender.app/Contents/MacOS/Blender -b -P olho_prototipo.py -- --sinal hemorragia --seed 3 --out /caminho/img.png
 Unidades: metros (1 mm = 0.001). Eixo óptico = +Z (câmera olha de +Z para -Z). Nasal = -X (olho direito).

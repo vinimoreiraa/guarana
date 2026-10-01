@@ -163,7 +163,7 @@ private fun Drawer(onPick: (Tela) -> Unit, onSair: () -> Unit) {
             Item(Icons.Outlined.Edit, "Editar logradouro") { onPick(Tela.Simples("Editar logradouro", "Não disponível no simulador.")) }
             Divider()
             Item(Icons.Outlined.HelpOutline, "Obter ajuda") { onPick(Tela.Simples("Obter ajuda", "Simulador do e-SUS Território para testes de integração do Guaraná. Fluxo: Lista de logradouros → imóvel → VISITAR → FINALIZAR. O que for gravado sai no logcat com a tag ESUSMOCK.")) }
-            Item(Icons.Outlined.Info, "Sobre") { onPick(Tela.Simples("Sobre", "e-SUS Território (simulador) · não é o aplicativo oficial do Ministério da Saúde. Dados fictícios de ${Repo.unidade}. Feito para o projeto Guaraná / Ocular.IA.")) }
+            Item(Icons.Outlined.Info, "Sobre") { onPick(Tela.Simples("Sobre", "e-SUS Território (simulador) · não é o aplicativo oficial do Ministério da Saúde. Dados fictícios de ${Repo.unidade}. Feito para o projeto Guaraná.")) }
             Item(Icons.Outlined.ExitToApp, "Sair", onSair)
         }
     }

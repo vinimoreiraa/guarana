@@ -6,7 +6,7 @@ import json, subprocess, sys, urllib.request, urllib.parse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1] / "dados" / "raw"
-UA = "Mozilla/5.0 (ocular-ia downloader)"
+UA = "Mozilla/5.0 (guarana downloader)"
 
 def get_json(url):
     req = urllib.request.Request(url, headers={"User-Agent": UA})

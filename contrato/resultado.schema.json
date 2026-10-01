@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "title": "Ocular.IA resultado de analise",
+  "title": "Guaraná resultado de analise",
   "description": "Contrato unico usado pelo app, pelo motor local e pela API. Triagem, nunca diagnostico.",
   "type": "object",
   "required": ["engine", "status", "quality", "signs", "triage", "needs_cloud_review", "model_version"],

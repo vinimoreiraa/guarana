@@ -1,6 +1,6 @@
 # Síntese de dados com Blender — pesquisa, recursos abertos e receitas
 
-*Projeto Guaraná / Ocular.IA — olho externo fotografado com celular. Pesquisa feita em 2026-09-30 nesta máquina (Mac, Apple M5 Pro).*
+*Projeto Guaraná — olho externo fotografado com celular. Pesquisa feita em 2026-09-30 nesta máquina (Mac, Apple M5 Pro).*
 
 Este documento reúne: (1) o que foi verificado no ambiente local; (2) os recursos **abertos** (CC0/CC-BY/CC-BY-SA/GPL) que foram baixados para `sintese/assets/` e os que **não** dá para baixar sem login; (3) como usar o MPFB (MakeHuman Plugin For Blender) headless para ter cabeça, pálpebras e olhos; (4) a receita do olho paramétrico em Cycles, já **implementada e testada** em `sintese/scripts/olho_prototipo.py`; (5) como pintar cada sinal clínico de forma procedural, com parâmetros e faixas; (6) o que a literatura diz sobre sim-to-real para imagens de olho; (7) checagens e próximos passos.
 
