@@ -1,0 +1,9 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="32dp"
+    android:viewportWidth="44" android:viewportHeight="59">
+    <!-- a mesma logo do icone, sem a margem da zona segura: caixa justa 44 x 59, para desenhar nitida em qualquer tamanho -->
+    <path android:fillColor="#9CC3A0" android:pathData="M24,14 Q26,1 37,0 Q36,12 24,14 Z" />
+    <path android:fillColor="#D9706A" android:pathData="M0,37 a22,22 0 1,0 44,0 a22,22 0 1,0 -44,0 z" />
+    <path android:fillColor="#FFF9F3" android:pathData="M10,37 a12,12 0 1,0 24,0 a12,12 0 1,0 -24,0 z" />
+    <path android:fillColor="#2B2320" android:pathData="M15,37 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0 z" />
+</vector>

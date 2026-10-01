@@ -1,0 +1,108 @@
+{
+  "name": "enquadramento_v1",
+  "file": "enquadramento_v1.onnx",
+  "created": "2026-09-30",
+  "input": {
+    "size": 160,
+    "gray": true,
+    "crop": "quadrado central",
+    "mean": 0.45,
+    "std": 0.25,
+    "note": "canal de luminancia replicado em 3 canais"
+  },
+  "classes": [
+    "OK",
+    "TOO_FAR",
+    "TOO_CLOSE",
+    "TWO_EYES",
+    "OFF_CENTER",
+    "NOT_FOUND"
+  ],
+  "val_accuracy": 0.876,
+  "confusion": [
+    [
+      155,
+      0,
+      11,
+      0,
+      38,
+      8
+    ],
+    [
+      0,
+      195,
+      0,
+      5,
+      2,
+      0
+    ],
+    [
+      8,
+      0,
+      192,
+      0,
+      0,
+      7
+    ],
+    [
+      0,
+      4,
+      0,
+      174,
+      1,
+      0
+    ],
+    [
+      30,
+      0,
+      0,
+      4,
+      159,
+      9
+    ],
+    [
+      11,
+      0,
+      9,
+      0,
+      2,
+      176
+    ]
+  ],
+  "natural_sets": {
+    "slid": {
+      "TOO_CLOSE": 0.57,
+      "NOT_FOUND": 0.26,
+      "OFF_CENTER": 0.14,
+      "OK": 0.03
+    },
+    "cfd": {
+      "OK": 1.0
+    },
+    "hf_jaundice": {
+      "OK": 0.56,
+      "OFF_CENTER": 0.21,
+      "TOO_CLOSE": 0.1,
+      "NOT_FOUND": 0.09,
+      "TWO_EYES": 0.04
+    },
+    "conj_seg": {
+      "OK": 0.94,
+      "OFF_CENTER": 0.04,
+      "NOT_FOUND": 0.01,
+      "TOO_CLOSE": 0.01
+    },
+    "eye_diseases": {
+      "TOO_CLOSE": 0.48,
+      "OK": 0.48,
+      "NOT_FOUND": 0.02,
+      "OFF_CENTER": 0.01
+    }
+  },
+  "train_images": 1900,
+  "val_images": 315,
+  "sources": [
+    "slid (circulos de pupila/cornea)",
+    "cfd periorbital (caixas de iris)"
+  ]
+}

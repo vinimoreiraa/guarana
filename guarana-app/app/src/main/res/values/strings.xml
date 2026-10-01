@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Guaraná</string>
+    <string name="companion_desc">Mostra a pílula "Analisar olho" do Guaraná por cima do e-SUS Território. Consulta apenas qual app está em primeiro plano; não lê o conteúdo da tela.</string>
+</resources>

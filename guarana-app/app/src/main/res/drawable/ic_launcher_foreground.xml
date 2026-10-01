@@ -1,0 +1,14 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- proporcoes do logotipo da Apple: corpo grande centrado, folha pequena inclinada em cima, a direita do centro.
+         Tudo dentro da zona segura do icone adaptativo (raio 33 em torno de 54,54). -->
+    <path android:fillColor="#9CC3A0"
+        android:pathData="M56,38 Q58,25 69,24 Q68,36 56,38 Z" />
+    <path android:fillColor="#D9706A"
+        android:pathData="M32,61 a22,22 0 1,0 44,0 a22,22 0 1,0 -44,0 z" />
+    <path android:fillColor="#FFF9F3"
+        android:pathData="M42,61 a12,12 0 1,0 24,0 a12,12 0 1,0 -24,0 z" />
+    <path android:fillColor="#2B2320"
+        android:pathData="M47,61 a7,7 0 1,0 14,0 a7,7 0 1,0 -14,0 z" />
+</vector>

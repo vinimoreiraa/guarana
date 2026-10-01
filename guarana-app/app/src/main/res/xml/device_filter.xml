@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- CH340 / CH341 (placa-base ESP32-CAM-MB e muitos DevKits) -->
+    <usb-device vendor-id="6790" />
+    <!-- CP210x (DevKits Espressif) -->
+    <usb-device vendor-id="4292" />
+    <!-- FTDI -->
+    <usb-device vendor-id="1027" />
+    <!-- Espressif USB nativo (ESP32-S3 / C3) -->
+    <usb-device vendor-id="12346" />
+</resources>
