@@ -19,7 +19,7 @@ Triagem, nunca diagnóstico. Os números de desempenho vêm de testes em fotos p
 
 ![Probabilidade por doença (recolhida sob o resultado) e mapa com o trajeto das visitas do dia](docs/img/app_detalhes_mapa.jpg)
 
-As probabilidades por doença ficam recolhidas sob o resultado. O mapa do dia, também offline, mostra a próxima casa. Vídeo de demonstração com dados fictícios: `Guarana_demo_historia.mp4` (fora do git).
+As probabilidades por doença ficam recolhidas sob o resultado. O mapa do dia, também offline, mostra a próxima casa.
 
 ## Hardware v0
 
