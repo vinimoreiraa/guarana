@@ -8,6 +8,32 @@ O Guaraná faz triagem de doenças do olho externo com a câmera do tablet do ag
 
 Triagem, nunca diagnóstico. Os números de desempenho vêm de testes em fotos públicas, não de validação clínica.
 
+## Como é na visita
+
+![Fluxo no tablet: ficha do domicílio no e-SUS, câmera do Guaraná com a pessoa já identificada, resultado em texto e visita registrada no e-SUS](docs/img/app_fluxo.jpg)
+
+1. Na ficha do domicílio do e-SUS Território, o agente abre a visita da pessoa.
+2. Toca no olho da pílula do Guaraná: a câmera abre já com o nome e o CNS lidos da tela do e-SUS, e o anel de luz faz a rotina (normal, azul, vermelho).
+3. Sai a triagem em texto, no aparelho e sem internet: precisa ou não de avaliação, a condição mais provável e onde o modelo olhou (em azul na foto).
+4. "Registrar visita no e-SUS" volta para a ficha e marca Busca ativa → Exame e o desfecho. O agente confere e finaliza.
+
+![Probabilidade por doença (recolhida sob o resultado) e mapa com o trajeto das visitas do dia](docs/img/app_detalhes_mapa.jpg)
+
+As probabilidades por doença ficam recolhidas sob o resultado. O mapa do dia, também offline, mostra a próxima casa. Vídeo de demonstração com dados fictícios: `Guarana_demo_historia.mp4` (fora do git).
+
+## Hardware v0
+
+<p>
+  <img src="docs/img/hardware_v0.jpg" alt="Suporte impresso em 3D com presilha para o tablet, braço e anel de luz em volta da câmera" width="300">
+  <img src="docs/img/anel_rotina.gif" alt="Anel acendendo branco, azul e vermelho em sequência" width="260">
+</p>
+
+Suporte impresso em 3D que prende no tablet e põe um anel de luz em volta da câmera. Dentro do anel, um ESP32 controla 9 LEDs: 3 brancos, 3 azuis e 3 vermelhos. O app manda a rotina de cores pela USB a cada foto, e as fotos sob cada cor alimentam o ramo de cor (icterícia, palidez, vermelhidão).
+
+![Anel sob luz branca, azul e vermelha](docs/img/anel_cores.jpg)
+
+É a primeira versão de uma lente que pode crescer para fundo de olho e outros controles de cor. Firmware e protocolo em [`firmware/`](firmware/).
+
 ## Estado
 
 | | |
@@ -16,7 +42,7 @@ Triagem, nunca diagnóstico. Os números de desempenho vêm de testes em fotos p
 | Integração e-SUS | pílula flutuante sobre o e-SUS Território, demonstrada num simulador fiel às telas reais; preenchimento automático da visita em andamento |
 | Modelo | melhor arquitetura no banco de testes: Perception Encoder S, **92,4%** de acurácia média em fotos do Google nunca vistas (4 condições) |
 | Ramo de cor | absorbância na esclera: icterícia AUROC 0,90 e vermelhidão 0,88 em fotos comuns sem controle de luz |
-| Hardware | v0: anel de LED RGB (ESP32) controlado pelo app; roadmap até lente de fundo de olho |
+| Hardware | v0: suporte impresso em 3D com anel de 9 LEDs (branco, azul, vermelho) e ESP32, controlado pelo app pela USB; roadmap até lente de fundo de olho |
 
 ## Estrutura
 
